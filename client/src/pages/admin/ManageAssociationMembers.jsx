@@ -450,7 +450,7 @@ const ManageAssociationMembers = () => {
                                                 <div className={`w-12 h-12 rounded-2xl font-black flex items-center justify-center text-lg ${
                                                     member.membershipStatus === 'Present' ? 'bg-indigo-100 text-indigo-600' : 'bg-amber-100 text-amber-600'
                                                 }`}>
-                                                    {member.username[0].toUpperCase()}
+                                                    {member?.username?.[0]?.toUpperCase() || '?'}
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-black text-slate-900">{member.username}</span>
