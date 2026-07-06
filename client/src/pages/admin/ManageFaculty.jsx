@@ -66,7 +66,7 @@ const ManageFaculty = () => {
             password: '',
             employeeId: fac.employeeId || '',
             phone: fac.phone || '',
-            gender: fac.gender || 'Male',
+            gender: fac.gender || 'Female',
             department: fac.department || 'Computer Science and Engineering',
             designation: fac.designation || 'Assistant Professor',
             role: fac.role,
@@ -287,7 +287,7 @@ const ManageFaculty = () => {
                                         <td className="px-10 py-6">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 font-black flex items-center justify-center text-lg">
-                                                    {fac.username[0].toUpperCase()}
+                                                    {fac?.username?.[0]?.toUpperCase() || '?'}
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-black text-slate-900">{fac.username}</span>
