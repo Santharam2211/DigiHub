@@ -371,7 +371,7 @@ const handleDownloadPDF = async (id) => {
                                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${
                                             selectedNomination?._id === n._id ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-400'
                                         }`}>
-                                            {n.user?.username?.[0].toUpperCase()}
+                                            {n?.user?.username?.[0]?.toUpperCase() || '?'}
                                         </div>
                                         <div>
                                             <p className="font-bold text-sm">{n.user?.username}</p>
