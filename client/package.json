@@ -13,6 +13,7 @@
     "axios": "^1.6.7",
     "caniuse-lite": "^1.0.30001797",
     "date-fns": "^3.3.1",
+    "file-saver": "^2.0.5",
     "framer-motion": "^11.0.3",
     "html5-qrcode": "^2.3.8",
     "jspdf": "^4.2.1",
@@ -27,6 +28,7 @@
     "react-signature-canvas": "^1.1.0-alpha.2",
     "recharts": "^3.9.0",
     "socket.io-client": "^4.7.4",
+    "xlsx":"^0.18.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
