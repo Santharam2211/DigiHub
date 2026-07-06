@@ -8,4 +8,7 @@ const root = fileURLToPath(new URL('.', import.meta.url))
 export default defineConfig({
   root,
   plugins: [react()],
+    css: {
+    transformer: 'postcss',
+  },
 })
