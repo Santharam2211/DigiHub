@@ -187,7 +187,7 @@ const FacultyDashboard = ({ user }) => {
             <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-wrap justify-between items-center gap-8">
                 <div className="flex items-center gap-6">
                     <div className="w-24 h-24 rounded-3xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-4xl font-black border border-indigo-100 ring-8 ring-indigo-50/50">
-                        {user.username[0].toUpperCase()}
+                        {user?.username?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div>
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight">Welcome, {user.username}.</h1>
@@ -752,7 +752,7 @@ const Dashboard = () => {
             <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-wrap justify-between items-center gap-8">
                 <div className="flex items-center gap-6">
                     <div className="w-24 h-24 rounded-3xl bg-primary-50 flex items-center justify-center text-primary-600 text-4xl font-black border border-primary-100 ring-8 ring-primary-50/50">
-                        {user.username[0].toUpperCase()}
+                        {user?.username?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div>
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight">Welcome, {user.username}.</h1>
