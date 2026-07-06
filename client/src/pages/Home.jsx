@@ -366,10 +366,9 @@ const Home = () => {
 
                     <div className="flex gap-4">
                         {[
-                            { icon: Twitter, href: '#', label: 'Twitter' },
-                            { icon: Github, href: '#', label: 'GitHub' },
-                            { icon: Linkedin, href: '#', label: 'LinkedIn' },
-                            { icon: Instagram, href: '#', label: 'Instagram' }
+                           
+                            { icon: Linkedin, href: 'https://www.linkedin.com/company/digiflash-cse/', label: 'LinkedIn' },
+                            { icon: Instagram, href: 'https://www.instagram.com/digiflash_cse?igsh=MWpjemJueWgya2ZmaA==', label: 'Instagram' }
                         ].map((social, i) => (
                             <a
                                 key={i}
