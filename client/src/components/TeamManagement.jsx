@@ -73,7 +73,7 @@ const TeamManagement = ({ teamId, isLeader }) => {
                         <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center font-bold text-primary-700">
-                                    {member.user.username[0].toUpperCase()}
+                                    {member?.user?.username?.[0]?.toUpperCase() || '?'}
                                 </div>
                                 <div>
                                     <p className="font-bold text-gray-900">{member.user.username}</p>
