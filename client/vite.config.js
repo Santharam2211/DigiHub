@@ -4,11 +4,19 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('.', import.meta.url))
 
+import tailwindcss from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
+
 // https://vite.dev/config/
 export default defineConfig({
   root,
   plugins: [react()],
-    css: {
-    transformer: 'postcss',
+  css: {
+    postcss: {
+      plugins: [
+        tailwindcss(),
+        autoprefixer(),
+      ],
+    },
   },
 })
