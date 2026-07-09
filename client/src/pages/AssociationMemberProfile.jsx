@@ -11,6 +11,7 @@ import {
     TrendingUp, Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useConfirm } from '../contexts/ConfirmContext';
 
 
 const TABS = ['Profile', 'My Applications', 'Security'];
@@ -23,6 +24,7 @@ const statusConfig = {
 
 const AssociationMemberProfile = () => {
     const { user, updateUser } = useAuth();
+    const { confirm } = useConfirm();
     const [activeTab, setActiveTab] = useState('Profile');
     const [isLoading, setIsLoading] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
@@ -166,7 +168,8 @@ const AssociationMemberProfile = () => {
     };
 
     const handleWithdraw = async (appId) => {
-        if (!confirm('Withdraw this application?')) return;
+        const confirmed = await confirm('Withdraw this application?');
+        if (!confirmed) return;
         try {
             await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/volunteers/${appId}`);
             toast.success('Application withdrawn');
