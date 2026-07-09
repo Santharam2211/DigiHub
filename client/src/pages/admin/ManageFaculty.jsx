@@ -7,6 +7,7 @@ import {
     ArrowLeft, User, Phone, Hash, GraduationCap, School,
     CheckCircle, UserCheck, Briefcase, Edit2, Trash2, Save, X
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConfirm } from '../../contexts/ConfirmContext';
 
