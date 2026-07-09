@@ -70,7 +70,7 @@ const Login = () => {
                                     type="email"
                                     name="email"
                                     className="input-premium pl-14"
-                                    placeholder="name@example.com"
+                                    placeholder="name@domain.com"
                                     required
                                     value={formData.email}
                                     onChange={handleChange}
