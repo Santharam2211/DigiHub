@@ -1,8 +1,10 @@
 import { getImageUrl } from '../../utils/imageUrl';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useConfirm } from '../../contexts/ConfirmContext';
 import {
     MessageSquare, ChevronDown, ChevronUp, Mail, BarChart2,
     FileText, Download, Loader2, TrendingUp, Star, SmilePlus,
@@ -91,6 +93,7 @@ const CustomBarTooltip = ({ active, payload, label }) => {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const FeedbackManagement = () => {
+    const { confirm } = useConfirm();
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [feedbackData, setFeedbackData] = useState([]);
@@ -128,7 +131,8 @@ const FeedbackManagement = () => {
 
     const handleSendEmails = async () => {
         if (!selectedEvent) return;
-        if (!window.confirm(`Send feedback form emails to all attendees of "${selectedEvent.title}"?`)) return;
+        const confirmed = await confirm(`Send feedback form emails to all attendees of "${selectedEvent.title}"?`);
+        if (!confirmed) return;
         setIsSending(true);
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/feedback/send/${selectedEvent._id}`);
@@ -618,7 +622,7 @@ const FeedbackManagement = () => {
                         <MessageSquare className="w-7 h-7" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900">Feedback Management</h1>
+                        <h1 className="text-3xl font-black text-gray-900 dark:text-white">Feedback Management</h1>
                         <p className="text-gray-500 font-medium">Visual analytics with sentiment insights</p>
                     </div>
                 </div>
@@ -662,7 +666,7 @@ const FeedbackManagement = () => {
                                 key={event._id}
                                 whileHover={{ x: 4 }}
                                 onClick={() => loadFeedback(event)}
-                                className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedEvent?._id === event._id ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-100' : 'bg-white border-gray-100 hover:border-primary-200 text-gray-900' }`}
+                                className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedEvent?._id === event._id ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-100' : 'bg-white border-gray-100 hover:border-primary-200 text-gray-900 dark:text-white' }`}
                             >
                                 <p className="font-bold text-sm truncate">{event.title}</p>
                                 <p className={`text-xs mt-1 ${selectedEvent?._id === event._id ? 'text-primary-100' : 'text-gray-400'}`}>
@@ -721,7 +725,7 @@ const FeedbackManagement = () => {
                                 <div className="bg-white dark:bg-[#20242B] p-8 rounded-2xl border border-gray-100 shadow-sm dark:text-white">
                                     <div className="flex items-center gap-2 mb-6">
                                         <Brain className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                                        <h3 className="text-xl font-black text-gray-900">Sentiment Overview</h3>
+                                        <h3 className="text-xl font-black text-gray-900 dark:text-white">Sentiment Overview</h3>
                                     </div>
                                     <div className="flex flex-col sm:flex-row items-center gap-6">
                                         <div className="w-full sm:w-64 h-52">
@@ -779,13 +783,13 @@ const FeedbackManagement = () => {
                                 <div className="bg-white dark:bg-[#20242B] p-8 rounded-2xl border border-gray-100 shadow-sm space-y-8 dark:text-white">
                                     <div className="flex items-center gap-2">
                                         <BarChart2 className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                                        <h3 className="text-xl font-black text-gray-900">Question Analytics</h3>
+                                        <h3 className="text-xl font-black text-gray-900 dark:text-white">Question Analytics</h3>
                                     </div>
 
                                     {Object.entries(summary).map(([label, info]) => (
                                         <div key={label} className="space-y-3 border-b border-gray-100 pb-8 last:border-0 last:pb-0">
                                             <div className="flex items-start justify-between gap-4">
-                                                <p className="text-sm font-bold text-gray-800">{label}</p>
+                                                <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{label}</p>
 
                                                 {info.type === 'counts' && (
                                                     <button
