@@ -9,10 +9,12 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useConfirm } from '../../contexts/ConfirmContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const ManageAssociationMembers = () => {
+    const { confirm } = useConfirm();
     const [members, setMembers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
@@ -152,7 +154,8 @@ const ManageAssociationMembers = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this member account?')) return;
+        const confirmed = await confirm('Delete this member account?');
+        if (!confirmed) return;
         try {
             await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/users/${id}`);
             toast.success('Member deleted');
@@ -197,7 +200,8 @@ const ManageAssociationMembers = () => {
     };
 
     const handleMoveAllToPast = async () => {
-        if (!window.confirm('Are you sure you want to move ALL present members to the Alumni section?')) return;
+        const confirmed = await confirm('Are you sure you want to move ALL present members to the Alumni section?');
+        if (!confirmed) return;
         try {
             const res = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/move-all-past`);
             toast.success(res.data.message || 'All members moved to Alumni');
@@ -383,33 +387,33 @@ const ManageAssociationMembers = () => {
             </AnimatePresence>
 
             <div className="bg-white dark:bg-[#20242B] rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden dark:text-white">
-                <div className="px-10 py-8 border-b border-slate-50 space-y-8">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-black text-slate-900 dark:text-white">Member Directory</h2>
-                        <div className="flex items-center gap-4">
+                <div className="px-6 md:px-10 py-6 md:py-8 border-b border-slate-50 space-y-4 md:space-y-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Member Directory</h2>
+                        <div className="flex flex-wrap items-center gap-2 md:gap-4">
                             <button
                                 onClick={handleMoveAllToPast}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-amber-100 text-amber-700 dark:text-amber-300 rounded-xl text-xs font-black hover:bg-amber-200 transition-all"
+                                className="flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-700 dark:text-amber-300 rounded-xl text-xs font-black hover:bg-amber-200 transition-all"
                             >
                                 <History className="w-4 h-4" /> Move All to Alumni
                             </button>
                             <button
                                 onClick={handleDownloadPDF}
                                 disabled={members.length === 0}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-black hover:bg-slate-700 transition-all disabled:opacity-40"
+                                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-black hover:bg-slate-700 transition-all disabled:opacity-40"
                             >
                                 <Download className="w-4 h-4" /> Download PDF
                             </button>
                             <div className="flex bg-slate-50 dark:bg-[#1a1d24] p-1.5 rounded-2xl gap-2">
                                 <button
                                     onClick={() => setActiveTab('Present')}
-                                    className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'Present' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400 hover:text-slate-600'} dark:text-white`}
+                                    className={`px-4 md:px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'Present' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400 hover:text-slate-600'} dark:text-white`}
                                 >
                                     Present
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('Past')}
-                                    className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'Past' ? 'bg-white shadow-sm text-amber-600' : 'text-slate-400 hover:text-slate-600'} dark:text-white`}
+                                    className={`px-4 md:px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'Past' ? 'bg-white shadow-sm text-amber-600' : 'text-slate-400 hover:text-slate-600'} dark:text-white`}
                                 >
                                     Alumni
                                 </button>
@@ -418,7 +422,7 @@ const ManageAssociationMembers = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto -mx-0">
                     {isLoading ? (
                         <div className="p-16 text-center">
                             <Loader2 className="w-10 h-10 animate-spin text-slate-200 mx-auto" />
@@ -429,19 +433,19 @@ const ManageAssociationMembers = () => {
                             <h3 className="text-2xl font-black text-slate-300">No members found</h3>
                         </div>
                     ) : (
-                        <table className="w-full text-left">
+                        <table className="w-full text-left min-w-[640px]">
                             <thead>
                                 <tr className="bg-slate-50/50">
-                                    <th className="px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Member Info</th>
-                                    <th className="px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Academic</th>
-                                    <th className="px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Status</th>
-                                    <th className="px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                                    <th className="px-6 md:px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Member Info</th>
+                                    <th className="px-6 md:px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Academic</th>
+                                    <th className="px-6 md:px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                    <th className="px-6 md:px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {filteredMembers.map(member => (
-                                    <tr key={member._id} className="hover:bg-slate-50 dark:hover:bg-[#2a2e36] transition-colors group">
-                                        <td className="px-10 py-6">
+                                    <tr key={member._id} className="hover:bg-slate-50 dark:hover:bg-[#2a2e36] transition-colors group border-b border-slate-50 dark:border-slate-800/50">
+                                        <td className="px-6 md:px-10 py-4 md:py-6">
                                             <div className="flex items-center gap-4">
                                                 <div className={`w-12 h-12 rounded-2xl font-black flex items-center justify-center text-lg ${member.membershipStatus === 'Present' ? 'bg-indigo-100 text-indigo-600' : 'bg-amber-100 text-amber-600'}`}>
                                                     {member?.username?.[0]?.toUpperCase() || '?'}
@@ -457,7 +461,7 @@ const ManageAssociationMembers = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-6 md:px-10 py-4 md:py-6">
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
                                                     <GraduationCap className="w-3.5 h-3.5" /> {member.yearAndDept}
@@ -467,13 +471,13 @@ const ManageAssociationMembers = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-6 md:px-10 py-4 md:py-6">
                                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${member.membershipStatus === 'Present' ? 'bg-emerald-50 text-emerald-600 dark:text-emerald-400 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
                                                 {member.membershipStatus === 'Present' ? <CheckCircle className="w-3 h-3" /> : <History className="w-3 h-3" />}
                                                 {member.membershipStatus === 'Past' ? 'Alumni' : member.membershipStatus}
                                             </span>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-6 md:px-10 py-4 md:py-6">
                                             <div className="flex items-center gap-3">
                                                 <button
                                                     onClick={() => toggleMemberStatus(member._id, member.membershipStatus)}
