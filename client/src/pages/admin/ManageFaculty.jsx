@@ -7,10 +7,11 @@ import {
     ArrowLeft, User, Phone, Hash, GraduationCap, School,
     CheckCircle, UserCheck, Briefcase, Edit2, Trash2, Save, X
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 const ManageFaculty = () => {
+    const { confirm } = useConfirm();
     const [faculty, setFaculty] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
@@ -77,7 +78,8 @@ const ManageFaculty = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this faculty account?')) return;
+        const confirmed = await confirm('Delete this faculty account?');
+        if (!confirmed) return;
         try {
             await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/users/${id}`);
             toast.success('Account deleted');
