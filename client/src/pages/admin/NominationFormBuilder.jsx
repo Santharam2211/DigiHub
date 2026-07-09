@@ -5,6 +5,7 @@ import { Plus, Trash2, Layout, Save, ChevronLeft, Type, CheckSquare, List, Calen
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import RichTextEditor from '../../components/RichTextEditor';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 // Built-in default form sections that every nomination form includes
 const DEFAULT_FORM_SECTIONS = [
@@ -53,6 +54,7 @@ const DEFAULT_FORM_SECTIONS = [
 
 const NominationFormBuilder = () => {
     const navigate = useNavigate();
+    const { confirm } = useConfirm();
     const [isLoading, setIsLoading] = useState(false);
     const [forms, setForms] = useState([]);
     const [showForm, setShowForm] = useState(false);
@@ -304,7 +306,8 @@ const NominationFormBuilder = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this form?')) return;
+        const confirmed = await confirm('Are you sure you want to delete this form?');
+        if (!confirmed) return;
         try {
             await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/nominations/forms/${id}`);
             toast.success('Form deleted');
