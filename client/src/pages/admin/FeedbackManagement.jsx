@@ -666,7 +666,7 @@ const FeedbackManagement = () => {
                                 key={event._id}
                                 whileHover={{ x: 4 }}
                                 onClick={() => loadFeedback(event)}
-                                className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedEvent?._id === event._id ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-100' : 'bg-white border-gray-100 hover:border-primary-200 text-gray-900 dark:text-white' }`}
+                                className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedEvent?._id === event._id ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-100' : 'bg-white border-gray-100 hover:border-primary-200 text-gray-900 dark:text-white'}`}
                             >
                                 <p className="font-bold text-sm truncate">{event.title}</p>
                                 <p className={`text-xs mt-1 ${selectedEvent?._id === event._id ? 'text-primary-100' : 'text-gray-400'}`}>
