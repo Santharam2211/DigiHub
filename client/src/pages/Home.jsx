@@ -137,11 +137,11 @@ const Home = () => {
                                 initial={{ opacity: 0, y: -20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.6, type: "spring", bounce: 0.4 }}
-                                className="mb-8 relative group cursor-default"
+                                className="mb-8 relative group cursor-default mx-auto"
                             >
                                 <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary-500 via-purple-500 to-primary-500 opacity-30 blur-lg group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-pulse"></span>
-                                <div className="relative px-6 py-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full shadow-xl text-sm md:text-base font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-3">
-                                    <Award className="w-5 h-5 text-primary-500 drop-shadow-sm" />
+                                <div className="relative px-4 sm:px-6 py-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full shadow-xl text-xs sm:text-sm md:text-base font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center justify-center text-center gap-2 sm:gap-3 whitespace-nowrap">
+                                    <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary-500 drop-shadow-sm shrink-0" />
                                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400">
                                         Association Coordinator
                                     </span>
