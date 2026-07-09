@@ -16,13 +16,23 @@ const encrypt = (text) => {
 
 const decrypt = (text) => {
     if (!text) return '';
-    const textParts = text.split(':');
-    const iv = Buffer.from(textParts.shift(), 'hex');
-    const encryptedText = textParts.join(':');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
-    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
+    try {
+        const textParts = text.split(':');
+        if (textParts.length < 2) return text; // Probably not encrypted
+        
+        const ivHex = textParts.shift();
+        const iv = Buffer.from(ivHex, 'hex');
+        if (iv.length !== IV_LENGTH) return text; // Invalid IV length, probably not encrypted
+        
+        const encryptedText = textParts.join(':');
+        const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+        let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    } catch (error) {
+        console.error('Decryption error:', error.message);
+        return text; // Return original if decryption fails (e.g. legacy plain text)
+    }
 };
 
 const userSchema = new mongoose.Schema({
@@ -215,11 +225,14 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 
 // Verify security question answers
 userSchema.methods.matchSecurityAnswers = function (answers) {
-    if (!this.securityQuestions) return false;
+    if (!this.securityQuestions || !answers) return false;
+    
+    const normalize = (str) => (str || '').toString().trim().toLowerCase();
+    
     return (
-        this.securityQuestions.bestFriendName === answers.bestFriendName &&
-        this.securityQuestions.favoriteColor === answers.favoriteColor &&
-        this.securityQuestions.favoriteHero === answers.favoriteHero
+        normalize(this.securityQuestions.bestFriendName) === normalize(answers.bestFriendName) &&
+        normalize(this.securityQuestions.favoriteColor) === normalize(answers.favoriteColor) &&
+        normalize(this.securityQuestions.favoriteHero) === normalize(answers.favoriteHero)
     );
 };
 
