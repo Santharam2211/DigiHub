@@ -37,7 +37,7 @@ const ManageAssociationMembers = () => {
 
     const fetchMembers = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/users`);
+            const res = await axios.get(`/api/auth/users`);
             const roles = ['Association Member'];
             setMembers(res.data.filter(u => roles.includes(u.role)));
         } catch (error) {
@@ -49,7 +49,19 @@ const ManageAssociationMembers = () => {
 
     useEffect(() => { fetchMembers(); }, []);
 
-    const handleDownloadPDF = () => {
+    const handleDownloadPDF = (filterType = 'All') => {
+        let membersToExport = members;
+        if (filterType === 'Present') {
+            membersToExport = members.filter(m => m.membershipStatus === 'Present');
+        } else if (filterType === 'Past') {
+            membersToExport = members.filter(m => m.membershipStatus === 'Past');
+        }
+
+        if (membersToExport.length === 0) {
+            toast.error(`No ${filterType === 'Past' ? 'Alumni' : filterType} members found to download.`);
+            return;
+        }
+
         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
         const pageW = doc.internal.pageSize.getWidth();
         const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -60,20 +72,23 @@ const ManageAssociationMembers = () => {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(14);
         doc.setTextColor(255, 255, 255);
-        doc.text('ASSOCIATION MEMBER DIRECTORY', pageW / 2, 10, { align: 'center' });
+        let title = 'ASSOCIATION MEMBER DIRECTORY';
+        if (filterType === 'Present') title = 'PRESENT ASSOCIATION MEMBERS';
+        if (filterType === 'Past') title = 'ALUMNI ASSOCIATION MEMBERS';
+        doc.text(title, pageW / 2, 10, { align: 'center' });
         doc.setFontSize(8);
         doc.setFont('helvetica', 'normal');
         doc.text(`Generated on ${today}`, pageW / 2, 17, { align: 'center' });
 
         // Sub-header chips
-        const presentCount = members.filter(m => m.membershipStatus === 'Present').length;
-        const pastCount = members.filter(m => m.membershipStatus === 'Past').length;
+        const presentCount = membersToExport.filter(m => m.membershipStatus === 'Present').length;
+        const pastCount = membersToExport.filter(m => m.membershipStatus === 'Past').length;
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(9);
         doc.setTextColor(30, 41, 59);
-        doc.text(`Total Members: ${members.length}   |   Present: ${presentCount}   |   Alumni: ${pastCount}`, pageW / 2, 30, { align: 'center' });
+        doc.text(`Total Exported: ${membersToExport.length}   |   Present: ${presentCount}   |   Alumni: ${pastCount}`, pageW / 2, 30, { align: 'center' });
 
-        const tableData = members.map((m, idx) => [
+        const tableData = membersToExport.map((m, idx) => [
             idx + 1,
             m.username || '-',
             m.email || '-',
@@ -119,8 +134,8 @@ const ManageAssociationMembers = () => {
             doc.text(`Page ${i} of ${pageCount}  |  Association Member Directory  |  Confidential`, pageW / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
         }
 
-        doc.save(`Association_Members_${activeTab}_${new Date().toISOString().slice(0, 10)}.pdf`);
-        toast.success('PDF downloaded successfully!');
+        doc.save(`Association_Members_${filterType}_${new Date().toISOString().slice(0, 10)}.pdf`);
+        toast.success(`${filterType} Members PDF downloaded successfully!`);
     };
 
     const resetForm = () => {
@@ -157,7 +172,7 @@ const ManageAssociationMembers = () => {
         const confirmed = await confirm('Delete this member account?');
         if (!confirmed) return;
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/users/${id}`);
+            await axios.delete(`/api/auth/users/${id}`);
             toast.success('Member deleted');
             fetchMembers();
         } catch (error) {
@@ -173,10 +188,10 @@ const ManageAssociationMembers = () => {
                 // If password is empty, don't send it
                 const updateData = { ...form };
                 if (!updateData.password) delete updateData.password;
-                await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/users/${editingId}`, updateData);
+                await axios.put(`/api/auth/users/${editingId}`, updateData);
                 toast.success('Member updated successfully!');
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/create-association-member`, form);
+                await axios.post(`/api/auth/create-association-member`, form);
                 toast.success(`Member account created for ${form.username}!`);
             }
             resetForm();
@@ -191,7 +206,7 @@ const ManageAssociationMembers = () => {
     const toggleMemberStatus = async (memberId, currentStatus) => {
         const nextStatus = currentStatus === 'Present' ? 'Past' : 'Present';
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/member-status/${memberId}`, { membershipStatus: nextStatus });
+            await axios.put(`/api/auth/member-status/${memberId}`, { membershipStatus: nextStatus });
             toast.success(`Status updated to ${nextStatus}`);
             fetchMembers();
         } catch (error) {
@@ -203,7 +218,7 @@ const ManageAssociationMembers = () => {
         const confirmed = await confirm('Are you sure you want to move ALL present members to the Alumni section?');
         if (!confirmed) return;
         try {
-            const res = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/move-all-past`);
+            const res = await axios.put(`/api/auth/move-all-past`);
             toast.success(res.data.message || 'All members moved to Alumni');
             fetchMembers();
             setActiveTab('Past');
@@ -397,13 +412,29 @@ const ManageAssociationMembers = () => {
                             >
                                 <History className="w-4 h-4" /> Move All to Alumni
                             </button>
-                            <button
-                                onClick={handleDownloadPDF}
-                                disabled={members.length === 0}
-                                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-black hover:bg-slate-700 transition-all disabled:opacity-40"
-                            >
-                                <Download className="w-4 h-4" /> Download PDF
-                            </button>
+                            <div className="flex bg-slate-900 text-white rounded-xl overflow-hidden text-xs font-black shadow-sm">
+                                <button
+                                    onClick={() => handleDownloadPDF('Present')}
+                                    disabled={members.length === 0}
+                                    className="px-4 py-2 hover:bg-slate-700 transition-all border-r border-slate-700 flex items-center gap-1.5 disabled:opacity-50"
+                                >
+                                    <Download className="w-3.5 h-3.5" /> Present PDF
+                                </button>
+                                <button
+                                    onClick={() => handleDownloadPDF('Past')}
+                                    disabled={members.length === 0}
+                                    className="px-4 py-2 hover:bg-slate-700 transition-all border-r border-slate-700 flex items-center gap-1.5 disabled:opacity-50"
+                                >
+                                    <Download className="w-3.5 h-3.5" /> Alumni PDF
+                                </button>
+                                <button
+                                    onClick={() => handleDownloadPDF('All')}
+                                    disabled={members.length === 0}
+                                    className="px-4 py-2 hover:bg-slate-700 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                                >
+                                    <Download className="w-3.5 h-3.5" /> All PDF
+                                </button>
+                            </div>
                             <div className="flex bg-slate-50 dark:bg-[#1a1d24] p-1.5 rounded-2xl gap-2">
                                 <button
                                     onClick={() => setActiveTab('Present')}
