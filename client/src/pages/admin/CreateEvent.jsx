@@ -5,11 +5,13 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Plus, Trash2, Calendar, Clock, MapPin, Image as ImageIcon, Briefcase, Users, Layout } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 
 const CreateEvent = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { confirm } = useConfirm();
     const [isLoading, setIsLoading] = useState(false);
     const [facultySearch, setFacultySearch] = useState('');
     const [facultyResults, setFacultyResults] = useState([]);
@@ -451,10 +453,11 @@ const CreateEvent = () => {
                             <div className="flex gap-2">
                                 <select 
                                     className="text-sm border border-rose-200 dark:border-rose-500/30 rounded-lg px-3 py-1 bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 outline-none focus:ring-2 focus:ring-rose-500 font-bold"
-                                    onChange={(e) => {
+                                    onChange={async (e) => {
                                         if (!e.target.value) return;
                                         const template = feedbackTemplates.find(t => t._id === e.target.value);
-                                        if (template && window.confirm('This will replace your current feedback fields. Continue?')) {
+                                        const confirmed = await confirm('This will replace your current feedback fields. Continue?');
+                                        if (template && confirmed) {
                                             setEventData({
                                                 ...eventData,
                                                 feedbackForm: template.fields.map(f => {
