@@ -15,9 +15,11 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 const AdminDashboard = () => {
     const { user } = useAuth();
+    const { confirm } = useConfirm();
     const currentUserRole = user?.role ?? '';
     const [stats, setStats] = useState({ totalEvents: 0, totalRegistrations: 0, totalAttendees: 0 });
     const [allEvents, setAllEvents] = useState([]);
@@ -208,7 +210,8 @@ const AdminDashboard = () => {
     };
 
     const handleDeleteEvent = async (eventId) => {
-        if (!window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+        const confirmed = await confirm('Are you sure you want to delete this event? This action cannot be undone.');
+        if (!confirmed) {
             return;
         }
 
