@@ -2,17 +2,36 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Plus, Trash2, Layout, Edit, Save, X } from 'lucide-react';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 const FeedbackTemplates = () => {
+    const { confirm } = useConfirm();
     const [templates, setTemplates] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         fields: []
     });
+
+    const resetForm = () => {
+        setIsCreating(false);
+        setEditingId(null);
+        setFormData({ name: '', description: '', fields: [] });
+    };
+
+    const handleEdit = (template) => {
+        setFormData({
+            name: template.name,
+            description: template.description || '',
+            fields: JSON.parse(JSON.stringify(template.fields || []))
+        });
+        setEditingId(template._id);
+        setIsCreating(true);
+    };
 
     useEffect(() => {
         fetchTemplates();
@@ -59,18 +78,23 @@ const FeedbackTemplates = () => {
         }
 
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/feedback-templates`, formData);
-            toast.success('Template created successfully');
-            setIsCreating(false);
-            setFormData({ name: '', description: '', fields: [] });
+            if (editingId) {
+                await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/feedback-templates/${editingId}`, formData);
+                toast.success('Template updated successfully');
+            } else {
+                await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/feedback-templates`, formData);
+                toast.success('Template created successfully');
+            }
+            resetForm();
             fetchTemplates();
         } catch (error) {
-            toast.error('Failed to save template');
+            toast.error(editingId ? 'Failed to update template' : 'Failed to save template');
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this template?')) return;
+        const confirmed = await confirm('Are you sure you want to delete this template?');
+        if (!confirmed) return;
         try {
             await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/feedback-templates/${id}`);
             toast.success('Template deleted');
@@ -103,9 +127,9 @@ const FeedbackTemplates = () => {
                 <div className="bg-white dark:bg-[#20242B] p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 space-y-6 dark:text-white">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-                            <Layout className="w-5 h-5" /> Create Template
+                            <Layout className="w-5 h-5" /> {editingId ? 'Edit Template' : 'Create Template'}
                         </h2>
-                        <button onClick={() => setIsCreating(false)} className="text-slate-400 hover:text-slate-600">
+                        <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
                             <X className="w-6 h-6" />
                         </button>
                     </div>
@@ -230,9 +254,12 @@ const FeedbackTemplates = () => {
                             )}
                         </div>
                         
-                        <div className="mt-6 flex justify-end">
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button onClick={resetForm} className="px-6 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-colors">
+                                Cancel
+                            </button>
                             <button onClick={handleSubmit} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl flex items-center gap-2">
-                                <Save className="w-4 h-4" /> Save Template
+                                <Save className="w-4 h-4" /> {editingId ? 'Update Template' : 'Save Template'}
                             </button>
                         </div>
                     </div>
@@ -252,9 +279,14 @@ const FeedbackTemplates = () => {
                                     <h3 className="font-bold text-lg text-slate-900 dark:text-white">{template.name}</h3>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{template.description || 'No description'}</p>
                                 </div>
-                                <button onClick={() => handleDelete(template._id)} className="text-red-400 hover:text-red-600 p-1">
-                                    <Trash2 className="w-5 h-5" />
-                                </button>
+                                <div className="flex gap-2">
+                                    <button onClick={() => handleEdit(template)} className="text-indigo-400 hover:text-indigo-600 p-1">
+                                        <Edit className="w-5 h-5" />
+                                    </button>
+                                    <button onClick={() => handleDelete(template._id)} className="text-red-400 hover:text-red-600 p-1">
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
                             <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between text-sm">
                                 <span className="text-slate-500 dark:text-slate-400">{template.fields?.length || 0} Fields</span>
