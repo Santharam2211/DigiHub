@@ -310,8 +310,8 @@ const AttendanceScanner = () => {
                                 </label>
                                 <p className="text-xs text-slate-400 font-medium">Input Registration ID or Roll Number</p>
                             </div>
-                            <div className="flex gap-4">
-                                <div className="relative flex-1">
+                            <div className="flex flex-col gap-4">
+                                <div className="relative w-full">
                                     <Search className="w-5 h-5 absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                                     <input 
                                         type="text" 
@@ -325,7 +325,7 @@ const AttendanceScanner = () => {
                                 <button 
                                     onClick={() => handleMarkAttendance(manualId)}
                                     disabled={isProcessing || !manualId}
-                                    className="px-6 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 transition-all font-bold flex items-center gap-2"
+                                    className="w-full py-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 transition-all font-bold flex items-center justify-center gap-2"
                                 >
                                     Submit
                                 </button>
