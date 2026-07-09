@@ -10,9 +10,11 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 
 const ManageCertificates = () => {
+    const { confirm } = useConfirm();
     const [events, setEvents] = useState([]);
     const [selectedEventId, setSelectedEventId] = useState('');
     const [config, setConfig] = useState({ fields: [] });
@@ -149,14 +151,15 @@ const ManageCertificates = () => {
 
     const handleBulkSend = async () => {
         if (!selectedEventId) return;
-        
+
         let confirmMsg = 'This will email certificates to ';
         if (sendTarget === 'participants') confirmMsg += 'ALL eligible participants (attended + feedback submitted)';
         else if (sendTarget === 'volunteers') confirmMsg += 'ALL approved volunteers for this event';
         else confirmMsg += 'ALL eligible participants and approved volunteers';
         confirmMsg += '. Continue?';
-        
-        if (!window.confirm(confirmMsg)) return;
+
+        const confirmed = await confirm(confirmMsg);
+        if (!confirmed) return;
 
         setIsBulkSending(true);
         try {
@@ -283,14 +286,14 @@ const ManageCertificates = () => {
                                 ctx.font = `${textStyle === 'bold' ? 'bold ' : textStyle === 'italic' ? 'italic ' : ''}${field.fontSize}px "${fontFam}"`;
                                 return sum + ctx.measureText(w.word).width;
                             }, 0);
-                            
+
                             let startX = field.x;
                             if (field.alignment === 'center') startX = field.x - lineWidth / 2;
                             if (field.alignment === 'right') startX = field.x - lineWidth;
 
                             let extraSpacePerWord = 0;
                             let isLastLine = (linesInfo.indexOf(lineArray) === linesInfo.length - 1);
-                            
+
                             if (field.alignment === 'justify' && !isLastLine && lineArray.length > 1) {
                                 let numSpaces = 0;
                                 lineArray.forEach(w => {
@@ -407,8 +410,8 @@ const ManageCertificates = () => {
                                 {isBulkSending ? <Loader2 className="w-6 h-6 animate-spin" /> : <Award className="w-6 h-6" />}
                                 Bulk Send
                             </button>
-                            <select 
-                                value={sendTarget} 
+                            <select
+                                value={sendTarget}
                                 onChange={e => setSendTarget(e.target.value)}
                                 className="bg-transparent text-emerald-700 dark:text-emerald-300 font-bold text-sm outline-none cursor-pointer pl-2 h-full"
                                 disabled={isBulkSending}
