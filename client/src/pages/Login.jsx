@@ -79,12 +79,7 @@ const Login = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                            <div className="flex items-center justify-between pl-1 pr-1">
-                                <label className="text-sm font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest">Password</label>
-                                <Link to="/forgot-password" className="text-sm font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 transition-colors">
-                                    Forgot Password?
-                                </Link>
-                            </div>
+                            <label className="text-sm font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Password</label>
                             <div className="relative">
 
                                 <input
@@ -96,6 +91,11 @@ const Login = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                 />
+                            </div>
+                            <div className="flex justify-end pr-1 pt-1">
+                                <Link to="/forgot-password" className="text-sm font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 transition-colors">
+                                    Forgot Password?
+                                </Link>
                             </div>
                         </div>
 
