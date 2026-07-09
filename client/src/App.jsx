@@ -35,11 +35,12 @@ import ManageExpenses from './pages/admin/ManageExpenses';
 import WorkRequests from './pages/WorkRequests';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
-
+import { ConfirmProvider } from './contexts/ConfirmContext';
 
 function App() {
   return (
     <ThemeProvider>
+      <ConfirmProvider>
       <AuthProvider>
         <Router>
           <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] transition-colors duration-300 relative">
@@ -102,6 +103,7 @@ function App() {
           </div>
         </Router>
       </AuthProvider>
+      </ConfirmProvider>
     </ThemeProvider>
   );
 }
