@@ -83,10 +83,21 @@ exports.createAssociationMember = async (req, res, next) => {
             phone, gender, yearAndDept, section, membershipStatus, role, associationRole 
         } = req.body;
 
-        const userExists = await User.findOne({ email });
-        if (userExists) {
+        if (!username || !email || !password) {
+            res.status(400);
+            throw new Error('Username, email, and password are required');
+        }
+
+        const emailExists = await User.findOne({ email });
+        if (emailExists) {
             res.status(400);
             throw new Error('An account with this email already exists');
+        }
+
+        const usernameExists = await User.findOne({ username });
+        if (usernameExists) {
+            res.status(400);
+            throw new Error('An account with this username already exists');
         }
 
         const member = await User.create({
@@ -95,10 +106,10 @@ exports.createAssociationMember = async (req, res, next) => {
             password,
             role: role || 'Association Member',
             registrationNumber: registrationNumber || undefined,
-            phone,
-            gender,
-            yearAndDept,
-            section,
+            phone: phone || undefined,
+            gender: gender || 'Male',
+            yearAndDept: yearAndDept || 'I B.E. CSE',
+            section: section || 'A',
             membershipStatus: membershipStatus || 'Present',
             associationRole: associationRole || ''
         });
