@@ -215,12 +215,12 @@ const Profile = () => {
                     ))}
                 </div>
 
-                <div className="relative p-10 pb-0">
+                <div className="relative p-6 md:p-10 pb-0">
                     {/* Top row */}
-                    <div className="flex flex-wrap items-center gap-8 mb-0">
+                    <div className="flex flex-col items-center justify-center text-center gap-6 mb-0">
                         {/* Avatar */}
-                        <div className="relative flex-shrink-0">
-                            <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-white/20 shadow-2xl bg-white/20 flex items-center justify-center backdrop-blur-sm dark:text-white">
+                        <div className="relative flex-shrink-0 mx-auto">
+                            <div className="w-28 h-28 md:w-32 md:h-32 rounded-[2.5rem] overflow-hidden border-4 border-white/20 shadow-2xl bg-white/20 flex items-center justify-center backdrop-blur-sm dark:text-white mx-auto">
                                 {profileImageUrl ? (
                                     <img src={profileImageUrl} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
@@ -235,43 +235,43 @@ const Profile = () => {
 
                         {/* Name / Role */}
                         <div className="flex-1 min-w-0">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 rounded-full text-white/80 text-xs font-black uppercase tracking-widest mb-3 border border-white/20 backdrop-blur-sm">
+                            <div className="inline-flex items-center justify-center gap-2 px-3 py-1 bg-white/15 rounded-full text-white/80 text-xs font-black uppercase tracking-widest mb-3 border border-white/20 backdrop-blur-sm">
                                 <BadgeCheck className="w-3 h-3" /> {user?.role || 'Member'}
                             </div>
-                            <h1 className="text-4xl font-black text-white tracking-tight truncate">{user?.username}</h1>
-                            <p className="text-white/60 font-medium mt-1 truncate">{user?.email}</p>
+                            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight truncate max-w-[280px] sm:max-w-md mx-auto">{user?.username}</h1>
+                            <p className="text-white/60 font-medium mt-1 truncate max-w-[280px] sm:max-w-md mx-auto">{user?.email}</p>
                         </div>
 
                         {/* Quick info pills */}
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-wrap justify-center gap-2 md:gap-3 w-full">
                             {isStudent && user?.registrationNumber && (
-                                <div className="px-4 py-2 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm dark:text-white">
+                                <div className="px-3 md:px-4 py-2 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm dark:text-white">
                                     <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Reg. No</p>
-                                    <p className="text-sm font-black text-white">{user.registrationNumber}</p>
+                                    <p className="text-xs md:text-sm font-black text-white">{user.registrationNumber}</p>
                                 </div>
                             )}
                             {isStudent && user?.yearAndDept && (
-                                <div className="px-4 py-2 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm dark:text-white">
-                                    <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Year & Dept</p>
-                                    <p className="text-sm font-black text-white">{user.yearAndDept}</p>
+                                <div className="px-3 md:px-4 py-2 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm dark:text-white">
+                                    <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Year &amp; Dept</p>
+                                    <p className="text-xs md:text-sm font-black text-white">{user.yearAndDept}</p>
                                 </div>
                             )}
                             {isStudent && user?.section && (
-                                <div className="px-4 py-2 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm dark:text-white">
+                                <div className="px-3 md:px-4 py-2 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm dark:text-white">
                                     <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Section</p>
-                                    <p className="text-sm font-black text-white">{user.section}</p>
+                                    <p className="text-xs md:text-sm font-black text-white">{user.section}</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex border-t border-white/10 mt-8">
+                    <div className="flex border-t border-white/10 mt-6 md:mt-8 overflow-x-auto">
                         {TABS.map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`flex-1 py-5 text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'text-white border-b-2 border-white' : 'text-white/40 hover:text-white/70'}`}
+                                className={`flex-1 py-4 md:py-5 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap px-2 ${activeTab === tab ? 'text-white border-b-2 border-white' : 'text-white/40 hover:text-white/70'}`}
                             >
                                 {tab}
                             </button>
