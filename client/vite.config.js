@@ -19,4 +19,18 @@ export default defineConfig({
       ],
     },
   },
+  server: {
+    proxy: {
+      // Forward /api requests to the backend during development
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      // Forward /uploads requests to the backend during development
+      '/uploads': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
+  },
 })
