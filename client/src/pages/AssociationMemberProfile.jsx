@@ -8,7 +8,7 @@ import {
     Loader2, Camera, Shield, Lock, Eye, EyeOff,
     Users, Calendar, CheckCircle, Clock, XCircle, Award,
     Handshake, FileText, Star, PenTool, BadgeCheck, Tag,
-    TrendingUp, Zap
+    TrendingUp, Zap, Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConfirm } from '../contexts/ConfirmContext';
@@ -17,9 +17,9 @@ import { useConfirm } from '../contexts/ConfirmContext';
 const TABS = ['Profile', 'My Applications', 'Security'];
 
 const statusConfig = {
-    Pending:  { color: 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-500/20',  Icon: Clock,         dot: 'bg-amber-400' },
+    Pending: { color: 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-500/20', Icon: Clock, dot: 'bg-amber-400' },
     Approved: { color: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20', Icon: CheckCircle, dot: 'bg-emerald-400' },
-    Rejected: { color: 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20',        Icon: XCircle,       dot: 'bg-red-400' }
+    Rejected: { color: 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20', Icon: XCircle, dot: 'bg-red-400' }
 };
 
 const AssociationMemberProfile = () => {
@@ -86,7 +86,7 @@ const AssociationMemberProfile = () => {
     const fetchVolunteerApps = async () => {
         setAppsLoading(true);
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/volunteers/my`);
+            const res = await axios.get(`/api/volunteers/my`);
             setVolunteerApps(res.data);
         } catch {
             toast.error('Failed to load volunteer applications');
@@ -104,7 +104,7 @@ const AssociationMemberProfile = () => {
         const fd = new FormData();
         fd.append('profileImage', file);
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/upload-profile`, fd, {
+            const response = await axios.post(`/api/auth/upload-profile`, fd, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             updateUser({ ...user, profileImage: response.data.profileImage });
@@ -136,7 +136,7 @@ const AssociationMemberProfile = () => {
             } else if (formData.signature) {
                 fd.append('signature', formData.signature);
             }
-            const response = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/profile`, fd, {
+            const response = await axios.put(`/api/auth/profile`, fd, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             updateUser(response.data);
@@ -154,7 +154,7 @@ const AssociationMemberProfile = () => {
         if (passwordData.newPassword.length < 6) return toast.error('Minimum 6 characters required');
         setIsChangingPassword(true);
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/update-password`, {
+            await axios.put(`/api/auth/update-password`, {
                 currentPassword: passwordData.currentPassword,
                 newPassword: passwordData.newPassword
             });
@@ -167,11 +167,28 @@ const AssociationMemberProfile = () => {
         }
     };
 
+    const handleDownloadVolCertificate = async (appId, eventTitle) => {
+        try {
+            const res = await axios.get(`/api/certificates/volunteer-download/${appId}`, {
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `certificate_${appId}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+            toast.success('Certificate downloaded!');
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Certificate download failed');
+        }
+    };
+
     const handleWithdraw = async (appId) => {
         const confirmed = await confirm('Withdraw this application?');
         if (!confirmed) return;
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/volunteers/${appId}`);
+            await axios.delete(`/api/volunteers/${appId}`);
             toast.success('Application withdrawn');
             fetchVolunteerApps();
         } catch (error) {
@@ -259,9 +276,9 @@ const AssociationMemberProfile = () => {
                         {/* Stats block */}
                         <div className="flex gap-6 mr-2">
                             {[
-                                { label: 'Applied',  value: volunteerApps.length, icon: Users,        color: 'text-slate-300' },
-                                { label: 'Approved', value: approvedCount,         icon: CheckCircle,  color: 'text-emerald-400' },
-                                { label: 'On-Duty',  value: onDutyCount,           icon: Award,        color: 'text-indigo-300' },
+                                { label: 'Applied', value: volunteerApps.length, icon: Users, color: 'text-slate-300' },
+                                { label: 'Approved', value: approvedCount, icon: CheckCircle, color: 'text-emerald-400' },
+                                { label: 'On-Duty', value: onDutyCount, icon: Award, color: 'text-indigo-300' },
                             ].map(stat => (
                                 <div key={stat.label} className="text-center">
                                     <stat.icon className={`w-5 h-5 mx-auto mb-1 ${stat.color}`} />
@@ -286,7 +303,7 @@ const AssociationMemberProfile = () => {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`flex-1 py-5 text-xs font-black uppercase tracking-widest transition-all relative ${ activeTab === tab ? 'text-white' : 'text-slate-500 hover:text-slate-300' }`}
+                                className={`flex-1 py-5 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === tab ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                             >
                                 {tab}
                                 {activeTab === tab && (
@@ -557,6 +574,15 @@ const AssociationMemberProfile = () => {
                                                         <Icon className="w-3.5 h-3.5" />
                                                         {app.status}
                                                     </span>
+                                                    {app.status === 'Approved' && (
+                                                        <button
+                                                            onClick={() => handleDownloadVolCertificate(app._id, app.event?.title)}
+                                                            className="flex items-center gap-1.5 text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors px-3 py-1.5 rounded-xl"
+                                                            title="Download your volunteer certificate"
+                                                        >
+                                                            <Download className="w-3.5 h-3.5" /> Certificate
+                                                        </button>
+                                                    )}
                                                     {app.status === 'Pending' && (
                                                         <button
                                                             onClick={() => handleWithdraw(app._id)}
@@ -572,18 +598,7 @@ const AssociationMemberProfile = () => {
                                 </div>
                             )}
 
-                            {/* Info card */}
-                            <div className="mt-8 p-6 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/10 dark:to-violet-500/10 border border-indigo-100/80 dark:border-indigo-500/20 rounded-3xl flex items-start gap-4">
-                                <div className="w-9 h-9 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-indigo-900 dark:text-indigo-200 text-sm mb-1">How On-Duty Works</h3>
-                                    <p className="text-indigo-700 dark:text-indigo-300 text-xs font-medium leading-relaxed">
-                                        When your volunteer application is <strong>Approved</strong>, the admin can issue an <strong>On-Duty letter</strong> for your academic department records, confirming your official event participation.
-                                    </p>
-                                </div>
-                            </div>
+
                         </div>
                     </motion.div>
                 )}
