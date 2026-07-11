@@ -100,6 +100,59 @@ router.get('/download/:regId', protect, async (req, res, next) => {
     }
 });
 
+// @desc    Download certificate (Volunteer/Association Member version)
+// @route   GET /api/certificates/volunteer-download/:volAppId
+// @access  Private (Applicant only)
+router.get('/volunteer-download/:volAppId', protect, async (req, res, next) => {
+    try {
+        const volApp = await VolunteerApplication.findById(req.params.volAppId)
+            .populate('applicant')
+            .populate('event');
+
+        if (!volApp) {
+            res.status(404);
+            throw new Error('Volunteer application not found');
+        }
+
+        // Ensure the requesting user is the applicant
+        if (volApp.applicant._id.toString() !== req.user._id.toString()) {
+            res.status(403);
+            throw new Error('You are not authorized to download this certificate');
+        }
+
+        // Only approved volunteers can download
+        if (volApp.status !== 'Approved') {
+            res.status(403);
+            throw new Error('Your application must be Approved to download a certificate');
+        }
+
+        const event = volApp.event;
+        if (!event.certificateConfig || !event.certificateConfig.template) {
+            res.status(404);
+            throw new Error('Certificate template not configured for this event. Please contact the administrator.');
+        }
+
+        // Build a mock registration object compatible with the certificate generator
+        const mockReg = {
+            participant: volApp.applicant,
+            event: event,
+            registrationId: `VOL-${volApp._id.toString().slice(-6).toUpperCase()}`
+        };
+
+        const pdfBuffer = await generateCertificate(mockReg, event.certificateConfig);
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename=certificate_${mockReg.registrationId}.pdf`,
+            'Content-Length': pdfBuffer.byteLength
+        });
+
+        res.send(Buffer.from(pdfBuffer));
+    } catch (error) {
+        next(error);
+    }
+});
+
 // @desc    Preview certificate
 // @route   POST /api/certificates/preview/:eventId
 // @access  Private/Admin
