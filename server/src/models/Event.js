@@ -41,20 +41,20 @@ const eventSchema = new mongoose.Schema({
     certificateConfig: {
         template: String,
         fields: [{
-            type: { type: String, enum: ['Prefix', 'Name', 'Year', 'Department', 'Text'] },
+                type: { type: String },
             text: String,
             x: Number,
             y: Number,
             fontSize: { type: Number, default: 20 },
             color: { type: String, default: '#000000' },
-            fontStyle: { type: String, enum: ['normal', 'bold', 'italic'], default: 'normal' },
+            fontStyle: { type: String, default: 'normal' },
             fontFamily: String,
-            variableColors: { type: Map, of: String },
-            variableFontStyles: { type: Map, of: String },
-            variableFontFamilies: { type: Map, of: String },
+            variableColors: { type: mongoose.Schema.Types.Mixed, default: {} },
+            variableFontStyles: { type: mongoose.Schema.Types.Mixed, default: {} },
+            variableFontFamilies: { type: mongoose.Schema.Types.Mixed, default: {} },
             underlineVariables: Boolean,
             width: Number,
-            alignment: { type: String, enum: ['left', 'center', 'right', 'justify'], default: 'left' }
+            alignment: { type: String, default: 'left' }
         }]
     }
 }, {
