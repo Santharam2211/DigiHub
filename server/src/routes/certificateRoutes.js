@@ -30,6 +30,7 @@ router.post('/config/:eventId', protect, authorize('Admin'), upload.single('temp
         }
 
         event.certificateConfig = config;
+        event.markModified('certificateConfig');
         await event.save();
 
         res.json(event.certificateConfig);
