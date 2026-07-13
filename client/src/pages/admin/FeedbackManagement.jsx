@@ -207,18 +207,29 @@ const FeedbackManagement = () => {
     })();
 
     // ─── PDF Export ───────────────────────────────────────────────────────────
-    const getBase64ImageFromUrl = async (imageUrl) => {
-        try {
-            const res = await fetch(imageUrl);
-            const blob = await res.blob();
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(blob);
-            });
-        } catch {
-            return null;
-        }
+    const getBase64ImageFromUrl = (imgUrl) => {
+        if (!imgUrl) return Promise.resolve(null);
+        if (imgUrl.startsWith('data:')) return Promise.resolve(imgUrl);
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.setAttribute('crossOrigin', 'anonymous');
+            img.src = imgUrl;
+            img.onload = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                } catch (e) {
+                    resolve(null);
+                }
+            };
+            img.onerror = () => {
+                resolve(null);
+            };
+        });
     };
 
     const captureChartAsImage = (label) => {
