@@ -100,7 +100,9 @@ const AttendanceRecords = () => {
                 symposiumName: 'DIGIFLASH 2026',
                 symposiumType: 'National Level Technical Symposium',
                 iicLogo: '',
-                digiflashLogo: ''
+                digiflashLogo: '',
+                associationCoordinatorSign: '',
+                hodSign: ''
             };
             try {
                 const settingsRes = await axios.get(`/api/settings`);
@@ -140,11 +142,15 @@ const AttendanceRecords = () => {
 
             const iicLogoUrl = settings.iicLogo ? getImageUrl(settings.iicLogo) : null;
             const digiflashLogoUrl = settings.digiflashLogo ? getImageUrl(settings.digiflashLogo) : null;
+            const assocSignUrl = settings.associationCoordinatorSign ? getImageUrl(settings.associationCoordinatorSign) : null;
+            const hodSignUrl = settings.hodSign ? getImageUrl(settings.hodSign) : null;
 
             // Preload logos and student signatures
-            const [iicLogoBase64, digiflashLogoBase64] = await Promise.all([
+            const [iicLogoBase64, digiflashLogoBase64, assocSignBase64, hodSignBase64] = await Promise.all([
                 iicLogoUrl ? getBase64Image(iicLogoUrl) : Promise.resolve(null),
-                digiflashLogoUrl ? getBase64Image(digiflashLogoUrl) : Promise.resolve(null)
+                digiflashLogoUrl ? getBase64Image(digiflashLogoUrl) : Promise.resolve(null),
+                assocSignUrl ? getBase64Image(assocSignUrl) : Promise.resolve(null),
+                hodSignUrl ? getBase64Image(hodSignUrl) : Promise.resolve(null)
             ]);
 
             const recordsToExport = [...filteredRecords];
@@ -380,9 +386,12 @@ const AttendanceRecords = () => {
             doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
             doc.setTextColor(30, 41, 59);
+
+            if (assocSignBase64) doc.addImage(assocSignBase64, 'PNG', 35, finalY - 12, 30, 15);
             doc.text("__________________________", 50, finalY, { align: 'center' });
             doc.text("Association Coordinator", 50, finalY + 7, { align: 'center' });
 
+            if (hodSignBase64) doc.addImage(hodSignBase64, 'PNG', 145, finalY - 12, 30, 15);
             doc.text("__________________________", 160, finalY, { align: 'center' });
             doc.text("Head of Department", 160, finalY + 7, { align: 'center' });
 
