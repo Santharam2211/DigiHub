@@ -88,7 +88,7 @@ exports.getEventFeedback = async (req, res, next) => {
             throw new Error('You are not authorized to view feedback for this event.');
         }
         const feedback = await Feedback.find({ event: req.params.eventId })
-            .populate('user', 'username email')
+            .populate('user', 'username email registrationNumber')
             .sort({ createdAt: -1 });
         res.json(feedback);
     } catch (error) {
@@ -109,13 +109,6 @@ exports.checkFeedbackStatus = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-};
-
-// @desc    Email feature removed
-// @route   POST /api/feedback/send/:eventId
-// @access  Private/Admin
-exports.sendFeedbackEmails = async (req, res, next) => {
-    res.status(410).json({ message: 'Email feature has been removed from this application.' });
 };
 
 // @desc    Get feedback analytics for an event
