@@ -11,6 +11,7 @@ import {
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConfirm } from '../../contexts/ConfirmContext';
+import { renderCertificateCanvas, downloadCertificateAsPDF } from '../../utils/renderCertificateCanvas';
 
 
 const ManageCertificates = () => {
@@ -180,18 +181,37 @@ const ManageCertificates = () => {
         }
     };
 
+    // Download PDF — renders on canvas then embeds as image, guaranteeing
+    // the downloaded PDF is pixel-identical to the on-screen preview.
     const handlePreview = async () => {
-        if (!selectedEventId) return;
+        if (!selectedEventId || !config.template) {
+            toast.error('Please upload a template before previewing.');
+            return;
+        }
         setIsPreviewing(true);
         try {
-            // Ensure we send the template info if it exists
-            const res = await axios.post(`/api/certificates/preview/${selectedEventId}`, config, {
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            window.open(url);
-        } catch (error) {
-            toast.error('Failed to generate preview');
+            const selectedEvent = events.find(e => e._id === selectedEventId);
+            const dummyParticipant = {
+                username           : 'Murugan',
+                gender             : 'Male',
+                yearAndDept        : 'III B.E. CSE',
+                registrationNumber : 'ST12345',
+                collegeName        : 'Saranathan College of Engineering',
+            };
+            const dummyEvent = {
+                title    : selectedEvent?.title || 'Event Name',
+                eventDate: selectedEvent?.eventDate || new Date().toISOString(),
+            };
+            await downloadCertificateAsPDF(
+                dummyParticipant,
+                dummyEvent,
+                config,
+                'REG98765',
+                `Preview_${(selectedEvent?.title || 'Certificate').replace(/\s+/g, '_')}.pdf`
+            );
+        } catch (err) {
+            console.error('Preview PDF error:', err);
+            toast.error('Failed to generate preview PDF');
         } finally {
             setIsPreviewing(false);
         }
@@ -222,214 +242,44 @@ const ManageCertificates = () => {
         }
     };
 
-    // Render Canvas Preview
+    // Live canvas preview — uses the exact same renderer as PDF generation
+    // so what you see is exactly what gets downloaded.
     useEffect(() => {
-        if (canvasRef.current && templatePreview) {
+        if (!canvasRef.current || !templatePreview) return;
+
+        const selectedEvent = events.find(e => e._id === selectedEventId);
+        const dummyParticipant = {
+            username           : 'Murugan',
+            gender             : 'Male',
+            yearAndDept        : 'III B.E. CSE',
+            registrationNumber : 'ST12345',
+            collegeName        : 'Saranathan College of Engineering',
+        };
+        const dummyEvent = {
+            title    : selectedEvent?.title    || 'Event Name',
+            eventDate: selectedEvent?.eventDate || new Date().toISOString(),
+        };
+
+        renderCertificateCanvas(
+            canvasRef.current,
+            dummyParticipant,
+            dummyEvent,
+            { ...config, template: templatePreview },
+            'REG98765'
+        ).then(() => {
+            // After the shared renderer finishes, overlay the indigo position dots
+            // so the admin can see where each field anchor sits.
             const canvas = canvasRef.current;
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.onload = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                // Draw fields
-                config.fields.forEach(field => {
-                    let fontFam = field.fontFamily || 'Helvetica';
-                    ctx.font = `${field.fontStyle === 'bold' ? 'bold ' : field.fontStyle === 'italic' ? 'italic ' : ''}${field.fontSize}px ${fontFam}`;
-
-                    if (field.type === 'Text') {
-                        let sampleText = field.text || '';
-                        const vars = {
-                            '{Prefix}': 'Selvan',
-                            '{Name}': 'Murugan',
-                            '{RegisterNumber}': 'ST12345',
-                            '{Year}': 'III',
-                            '{Department}': 'B.E. CSE',
-                            '{YearOfStudy}': 'III',
-                            '{Year&Department}': 'III B.E. CSE',
-                            '{EventName}': events.find(e => e._id === selectedEventId)?.title || 'Event Name',
-                            '{EventDate}': events.find(e => e._id === selectedEventId)?.eventDate ? new Date(events.find(e => e._id === selectedEventId).eventDate).toLocaleDateString() : new Date().toLocaleDateString(),
-                            '{CollegeName}': 'Dr. Mahalingam College of Engineering and Technology',
-                            '{RegistrationID}': 'REG98765'
-                        };
-
-                        // Tokenize the text into segments: { text, isVar }
-                        let segments = [];
-                        let currentIdx = 0;
-                        const regex = /\{([^}]+)\}/g;
-                        let match;
-                        while ((match = regex.exec(sampleText)) !== null) {
-                            if (match.index > currentIdx) {
-                                segments.push({ text: sampleText.substring(currentIdx, match.index), isVar: false });
-                            }
-                            const varName = match[0];
-                            const varValue = vars[varName] !== undefined ? vars[varName] : varName;
-                            segments.push({ text: varValue, isVar: true, originalVar: varName });
-                            currentIdx = regex.lastIndex;
-                        }
-                        if (currentIdx < sampleText.length) {
-                            segments.push({ text: sampleText.substring(currentIdx), isVar: false });
-                        }
-
-                        // Split segments into words
-                        let wordsInfo = [];
-                        segments.forEach(seg => {
-                            let words = seg.text.split(' ');
-                            words.forEach((w, i) => {
-                                if (i < words.length - 1) {
-                                    wordsInfo.push({ word: w + ' ', isVar: seg.isVar, originalVar: seg.originalVar });
-                                } else if (w.length > 0) {
-                                    wordsInfo.push({ word: w, isVar: seg.isVar, originalVar: seg.originalVar });
-                                }
-                            });
-                        });
-
-                        // Group into lines based on max width
-                        let linesInfo = [];
-                        let currentLine = [];
-                        let currentLineWidth = 0;
-                        const maxWidth = field.width || 600;
-
-                        for (let i = 0; i < wordsInfo.length; i++) {
-                            let wordObj = wordsInfo[i];
-                            let textStyle = field.fontStyle || 'normal';
-                            if (wordObj.isVar) {
-                                textStyle = (field.variableFontStyles && field.variableFontStyles[wordObj.originalVar]) || field.fontStyle || 'normal';
-                            }
-                            let fontFam = field.fontFamily || 'Helvetica';
-                            if (wordObj.isVar && field.variableFontFamilies && field.variableFontFamilies[wordObj.originalVar]) {
-                                fontFam = field.variableFontFamilies[wordObj.originalVar];
-                            }
-                            ctx.font = `${textStyle === 'bold' ? 'bold ' : textStyle === 'italic' ? 'italic ' : ''}${field.fontSize}px "${fontFam}"`;
-                            let wordWidth = ctx.measureText(wordObj.word).width;
-
-                            if (currentLineWidth + wordWidth > maxWidth && currentLine.length > 0) {
-                                linesInfo.push(currentLine);
-                                currentLine = [wordObj];
-                                currentLineWidth = wordWidth;
-                            } else {
-                                currentLine.push(wordObj);
-                                currentLineWidth += wordWidth;
-                            }
-                        }
-                        if (currentLine.length > 0) {
-                            linesInfo.push(currentLine);
-                        }
-
-                        // Draw lines
-                        let y = field.y;
-                        const lineHeight = field.fontSize * 1.2;
-
-                        linesInfo.forEach(lineArray => {
-                            const lineWidth = lineArray.reduce((sum, w) => {
-                                let textStyle = field.fontStyle || 'normal';
-                                if (w.isVar) {
-                                    textStyle = (field.variableFontStyles && field.variableFontStyles[w.originalVar]) || field.fontStyle || 'normal';
-                                }
-                                let fontFam = field.fontFamily || 'Helvetica';
-                                if (w.isVar && field.variableFontFamilies && field.variableFontFamilies[w.originalVar]) {
-                                    fontFam = field.variableFontFamilies[w.originalVar];
-                                }
-                                ctx.font = `${textStyle === 'bold' ? 'bold ' : textStyle === 'italic' ? 'italic ' : ''}${field.fontSize}px "${fontFam}"`;
-                                return sum + ctx.measureText(w.word).width;
-                            }, 0);
-
-                            let startX = field.x;
-                            if (field.alignment === 'center') startX = field.x - lineWidth / 2;
-                            if (field.alignment === 'right') startX = field.x - lineWidth;
-
-                            let extraSpacePerWord = 0;
-                            let isLastLine = (linesInfo.indexOf(lineArray) === linesInfo.length - 1);
-
-                            if (field.alignment === 'justify' && !isLastLine && lineArray.length > 1) {
-                                let numSpaces = 0;
-                                lineArray.forEach(w => {
-                                    if (w.word.endsWith(' ')) numSpaces++;
-                                });
-                                if (numSpaces > 0) {
-                                    extraSpacePerWord = (maxWidth - lineWidth) / numSpaces;
-                                }
-                            }
-
-                            let x = startX;
-                            ctx.textAlign = 'left';
-                            lineArray.forEach(chunk => {
-                                let textColor = field.color;
-                                let textStyle = field.fontStyle || 'normal';
-                                if (chunk.isVar) {
-                                    textColor = (field.variableColors && field.variableColors[chunk.originalVar]) || field.color;
-                                    textStyle = (field.variableFontStyles && field.variableFontStyles[chunk.originalVar]) || field.fontStyle || 'normal';
-                                }
-                                ctx.fillStyle = textColor;
-                                let fontFam = field.fontFamily || 'Helvetica';
-                                if (chunk.isVar && field.variableFontFamilies && field.variableFontFamilies[chunk.originalVar]) {
-                                    fontFam = field.variableFontFamilies[chunk.originalVar];
-                                }
-                                ctx.font = `${textStyle === 'bold' ? 'bold ' : textStyle === 'italic' ? 'italic ' : ''}${field.fontSize}px "${fontFam}"`;
-                                ctx.fillText(chunk.word, x, y);
-
-                                if (chunk.isVar && field.underlineVariables) {
-                                    let drawWidth = ctx.measureText(chunk.word.trimEnd()).width;
-                                    ctx.beginPath();
-                                    ctx.strokeStyle = textColor;
-                                    ctx.lineWidth = 1;
-                                    ctx.moveTo(x, y + 2);
-                                    ctx.lineTo(x + drawWidth, y + 2);
-                                    ctx.stroke();
-                                }
-
-                                x += ctx.measureText(chunk.word).width;
-                                if (field.alignment === 'justify' && !isLastLine && chunk.word.endsWith(' ')) {
-                                    x += extraSpacePerWord;
-                                }
-                            });
-                            y += lineHeight;
-                        });
-
-                    } else {
-                        ctx.fillStyle = field.color;
-                        ctx.textAlign = field.alignment;
-                        let sampleText = '';
-                        switch (field.type) {
-                            case 'Name': sampleText = 'Murugan'; break;
-                            case 'Prefix': sampleText = 'Selvan'; break;
-                            case 'Year': sampleText = 'III'; break;
-                            case 'Department': sampleText = 'B.E. CSE'; break;
-                        }
-
-                        // Handle wrapping for simple fields
-                        const words = sampleText.split(' ');
-                        let line = '';
-                        let y = field.y;
-                        const lineHeight = field.fontSize * 1.2;
-
-                        for (let n = 0; n < words.length; n++) {
-                            let testLine = line + words[n] + ' ';
-                            let metrics = ctx.measureText(testLine);
-                            let testWidth = metrics.width;
-                            if (testWidth > (field.width || 600) && n > 0) {
-                                ctx.fillText(line, field.x, y);
-                                line = words[n] + ' ';
-                                y += lineHeight;
-                            }
-                            else {
-                                line = testLine;
-                            }
-                        }
-                        ctx.fillText(line, field.x, y);
-                    }
-
-                    // Draw a small indicator for the point
-                    ctx.fillStyle = 'rgba(99, 102, 241, 0.5)';
-                    ctx.beginPath();
-                    ctx.arc(field.x, field.y, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-            };
-            img.src = templatePreview;
-        }
-    }, [templatePreview, config]);
+            (config.fields || []).forEach(field => {
+                ctx.fillStyle = 'rgba(99, 102, 241, 0.7)';
+                ctx.beginPath();
+                ctx.arc(field.x, field.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        });
+    }, [templatePreview, config, selectedEventId, events]);
 
     return (
         <div className="space-y-12 pb-40">
