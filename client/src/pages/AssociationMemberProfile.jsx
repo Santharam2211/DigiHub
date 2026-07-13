@@ -169,20 +169,21 @@ const AssociationMemberProfile = () => {
 
     const handleDownloadVolCertificate = async (appId, eventTitle) => {
         try {
-            const res = await axios.get(`/api/certificates/volunteer-download/${appId}`, {
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `certificate_${appId}.pdf`;
-            link.click();
-            window.URL.revokeObjectURL(url);
+            const { data } = await axios.get(`/api/certificates/volunteer-data/${appId}`);
+            const { downloadCertificateAsPDF } = await import('../utils/renderCertificateCanvas');
+            await downloadCertificateAsPDF(
+                data.participant,
+                data.event,
+                data.config,
+                data.registrationId,
+                `Certificate_${data.registrationId}_${(eventTitle || 'Volunteer').replace(/\s+/g, '_')}.pdf`
+            );
             toast.success('Certificate downloaded!');
         } catch (error) {
             toast.error(error.response?.data?.message || 'Certificate download failed');
         }
     };
+
 
     const handleWithdraw = async (appId) => {
         const confirmed = await confirm('Withdraw this application?');
