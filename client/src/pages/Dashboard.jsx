@@ -484,20 +484,22 @@ const Dashboard = () => {
 
     const handleDownloadCertificate = async (regId) => {
         try {
-            const res = await axios.get(`/api/certificates/download/${regId}`, {
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `certificate_${regId}.pdf`;
-            link.click();
-            window.URL.revokeObjectURL(url);
+            // Fetch validated data from the backend (eligibility check happens server-side)
+            const { data } = await axios.get(`/api/certificates/data/${regId}`);
+            const { downloadCertificateAsPDF } = await import('../utils/renderCertificateCanvas');
+            await downloadCertificateAsPDF(
+                data.participant,
+                data.event,
+                data.config,
+                data.registrationId,
+                `Certificate_${data.registrationId}.pdf`
+            );
             toast.success('Certificate downloaded!');
         } catch (error) {
             toast.error(error.response?.data?.message || 'Certificate download failed');
         }
     };
+
 
     const downloadQRWithTemplate = (reg) => {
         const canvas = document.createElement('canvas');
