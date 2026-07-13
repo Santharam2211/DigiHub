@@ -4,7 +4,6 @@ const {
     submitFeedback, 
     getEventFeedback, 
     checkFeedbackStatus,
-    sendFeedbackEmails,
     getFeedbackAnalytics,
     exportFeedbackExcel,
     exportFeedbackPDF
@@ -15,19 +14,17 @@ router.route('/')
     .post(protect, submitFeedback);
 
 router.route('/event/:eventId')
-    .get(protect, getEventFeedback);
+    .get(protect, authorize('Admin', 'Association Member', 'Faculty'), getEventFeedback);
 
 router.route('/analytics/:eventId')
-    .get(protect, getFeedbackAnalytics);
+    .get(protect, authorize('Admin', 'Association Member', 'Faculty'), getFeedbackAnalytics);
 
 router.route('/export/excel/:eventId')
-    .get(protect, exportFeedbackExcel);
+    .get(protect, authorize('Admin', 'Association Member', 'Faculty'), exportFeedbackExcel);
 
 router.route('/export/pdf/:eventId')
-    .get(protect, exportFeedbackPDF);
+    .get(protect, authorize('Admin', 'Association Member', 'Faculty'), exportFeedbackPDF);
 
-router.route('/send/:eventId')
-    .post(protect, sendFeedbackEmails);
 
 router.route('/check/:eventId')
     .get(protect, checkFeedbackStatus);
