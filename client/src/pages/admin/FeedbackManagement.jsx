@@ -129,21 +129,6 @@ const FeedbackManagement = () => {
         }
     };
 
-    const handleSendEmails = async () => {
-        if (!selectedEvent) return;
-        const confirmed = await confirm(`Send feedback form emails to all attendees of "${selectedEvent.title}"?`);
-        if (!confirmed) return;
-        setIsSending(true);
-        try {
-            const res = await axios.post(`/api/feedback/send/${selectedEvent._id}`);
-            toast.success(res.data.message);
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to send emails');
-        } finally {
-            setIsSending(false);
-        }
-    };
-
     const toggleExpand = (id) => setExpandedResponses(prev => ({ ...prev, [id]: !prev[id] }));
 
     // ─── Build Summary ─────────────────────────────────────────────────────────
@@ -301,22 +286,23 @@ const FeedbackManagement = () => {
             }
 
             const drawHeader = (docInstance) => {
-                // Left: Digiflash, Right: IIC
-                if (digiBase64) docInstance.addImage(digiBase64, 'PNG', 15, 12, 24, 24);
+                // Left: IIC, Right: Digiflash
+                if (iicBase64) docInstance.addImage(iicBase64, 'PNG', 15, 12, 24, 24);
                 else {
                     docInstance.setFillColor(245, 245, 245);
                     docInstance.rect(15, 12, 24, 24, 'FD');
                     docInstance.setFontSize(7);
                     docInstance.setTextColor(150, 150, 150);
-                    docInstance.text('DIGIFLASH', 27, 24, { align: 'center' });
+                    docInstance.text('IIC LOGO', 27, 24, { align: 'center' });
                 }
-                if (iicBase64) docInstance.addImage(iicBase64, 'PNG', 171, 12, 24, 24);
+
+                if (digiBase64) docInstance.addImage(digiBase64, 'PNG', 171, 12, 24, 24);
                 else {
                     docInstance.setFillColor(245, 245, 245);
                     docInstance.rect(171, 12, 24, 24, 'FD');
                     docInstance.setFontSize(7);
                     docInstance.setTextColor(150, 150, 150);
-                    docInstance.text('IIC LOGO', 183, 24, { align: 'center' });
+                    docInstance.text('DIGIFLASH', 183, 24, { align: 'center' });
                 }
 
                 docInstance.setTextColor(15, 23, 42);
@@ -350,6 +336,11 @@ const FeedbackManagement = () => {
                 docInstance.setFont('helvetica', 'bold');
                 const truncatedTitle = eventTitle.length > 30 ? eventTitle.substring(0, 30) + '...' : eventTitle;
                 docInstance.text(truncatedTitle, 46, 45);
+
+                docInstance.setFont('helvetica', 'normal');
+                docInstance.text('Date: ', 17, 50.5);
+                docInstance.setFont('helvetica', 'bold');
+                docInstance.text(new Date(selectedEvent.eventDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }), 27, 50.5);
 
                 docInstance.setFont('helvetica', 'normal');
                 docInstance.text('Total Responses: ', 113, 45);
@@ -571,11 +562,6 @@ const FeedbackManagement = () => {
                 theme: 'grid',
                 styles: { fontSize: 7, cellPadding: 2.5, overflow: 'linebreak' },
                 headStyles: { fillColor: [30, 41, 59], textColor: 255, fontStyle: 'bold', halign: 'center' },
-                columnStyles: {
-                    0: { cellWidth: 25 },
-                    1: { cellWidth: 20 },
-                    2: { cellWidth: 22 },
-                },
                 margin: { top: 65 },
                 didDrawPage: (data) => {
                     if (data.pageNumber > 1) drawHeader(doc);
@@ -651,18 +637,6 @@ const FeedbackManagement = () => {
                         >
                             <Download className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                             Download Report
-                        </button>
-                        <button
-                            onClick={handleSendEmails}
-                            disabled={isSending}
-                            className="btn-primary flex items-center gap-2 px-6 py-3 shadow-lg shadow-primary-100"
-                        >
-                            {isSending ? (
-                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
-                            ) : (
-                                <Mail className="w-5 h-5" />
-                            )}
-                            {isSending ? 'Sending...' : 'Send to Attendees'}
                         </button>
                     </div>
                 )}
