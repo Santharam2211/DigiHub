@@ -41,7 +41,7 @@ const generateExcelReport = async (registrations, eventTitle) => {
             regId: reg.registrationId,
             name: reg.participant?.username || 'N/A',
             email: reg.participant?.email || 'N/A',
-            studentId: reg.participant?.registrationNumber || '-',
+            studentId: reg.participant?.registrationNumber || 'N/A',
             attendance: reg.attendanceStatus ? 'Yes' : 'No',
             time: reg.attendanceTime ? new Date(reg.attendanceTime).toLocaleString() : '-'
         };
@@ -146,12 +146,12 @@ const generatePDFReport = async (registrations, event, options = {}) => {
     const digiflashLogoObj = await getLogoBase64(settings.digiflashLogo);
 
     const drawHeader = (docInstance) => {
-        // Left Logo (Digiflash)
-        if (digiflashLogoObj) {
+        // Left Logo (IIC)
+        if (iicLogoObj) {
             try {
-                docInstance.addImage(digiflashLogoObj.data, digiflashLogoObj.format, 15, 12, 24, 24);
+                docInstance.addImage(iicLogoObj.data, iicLogoObj.format, 15, 12, 24, 24);
             } catch (e) {
-                console.error("Error adding Digiflash logo", e);
+                console.error("Error adding IIC logo", e);
                 docInstance.rect(15, 12, 24, 24);
             }
         } else {
@@ -161,15 +161,15 @@ const generatePDFReport = async (registrations, event, options = {}) => {
             docInstance.setFont("helvetica", "bold");
             docInstance.setFontSize(8);
             docInstance.setTextColor(150, 150, 150);
-            docInstance.text("DIGIFLASH", 27, 24, { align: 'center' });
+            docInstance.text("IIC LOGO", 27, 24, { align: 'center' });
         }
 
-        // Right Logo (IIC)
-        if (iicLogoObj) {
+        // Right Logo (Digiflash)
+        if (digiflashLogoObj) {
             try {
-                docInstance.addImage(iicLogoObj.data, iicLogoObj.format, 171, 12, 24, 24);
+                docInstance.addImage(digiflashLogoObj.data, digiflashLogoObj.format, 171, 12, 24, 24);
             } catch (e) {
-                console.error("Error adding IIC logo", e);
+                console.error("Error adding Digiflash logo", e);
                 docInstance.rect(171, 12, 24, 24);
             }
         } else {
@@ -179,7 +179,7 @@ const generatePDFReport = async (registrations, event, options = {}) => {
             docInstance.setFont("helvetica", "bold");
             docInstance.setFontSize(8);
             docInstance.setTextColor(150, 150, 150);
-            docInstance.text("IIC LOGO", 183, 24, { align: 'center' });
+            docInstance.text("DIGIFLASH", 183, 24, { align: 'center' });
         }
 
         // Center Header Texts
@@ -270,7 +270,7 @@ const generatePDFReport = async (registrations, event, options = {}) => {
 
             const rowData = [
                 (index + 1).toString(),
-                participant.registrationNumber || '-',
+                participant.registrationNumber || 'N/A',
                 participant.username || 'N/A',
                 classDept
             ];
@@ -309,7 +309,7 @@ const generatePDFReport = async (registrations, event, options = {}) => {
                     : (participant.yearAndDept || participant.department || '-');
 
                 const rowData = [
-                    participant.registrationNumber || '-',
+                    participant.registrationNumber || 'N/A',
                     participant.username || 'N/A',
                     classDept
                 ];
@@ -444,12 +444,12 @@ const generateFeedbackPDFReport = async (feedbacks, event, options = {}) => {
     const digiflashLogoObj = await getLogoBase64(settings.digiflashLogo);
 
     const drawHeader = (docInstance) => {
-        // Left Logo (Digiflash)
-        if (digiflashLogoObj) {
+        // Left Logo (IIC)
+        if (iicLogoObj) {
             try {
-                docInstance.addImage(digiflashLogoObj.data, digiflashLogoObj.format, 15, 12, 24, 24);
+                docInstance.addImage(iicLogoObj.data, iicLogoObj.format, 15, 12, 24, 24);
             } catch (e) {
-                console.error("Error adding Digiflash logo", e);
+                console.error("Error adding IIC logo", e);
                 docInstance.rect(15, 12, 24, 24);
             }
         } else {
@@ -459,15 +459,15 @@ const generateFeedbackPDFReport = async (feedbacks, event, options = {}) => {
             docInstance.setFont("helvetica", "bold");
             docInstance.setFontSize(8);
             docInstance.setTextColor(150, 150, 150);
-            docInstance.text("DIGIFLASH", 27, 24, { align: 'center' });
+            docInstance.text("IIC LOGO", 27, 24, { align: 'center' });
         }
 
-        // Right Logo (IIC)
-        if (iicLogoObj) {
+        // Right Logo (Digiflash)
+        if (digiflashLogoObj) {
             try {
-                docInstance.addImage(iicLogoObj.data, iicLogoObj.format, 171, 12, 24, 24);
+                docInstance.addImage(digiflashLogoObj.data, digiflashLogoObj.format, 171, 12, 24, 24);
             } catch (e) {
-                console.error("Error adding IIC logo", e);
+                console.error("Error adding Digiflash logo", e);
                 docInstance.rect(171, 12, 24, 24);
             }
         } else {
@@ -477,7 +477,7 @@ const generateFeedbackPDFReport = async (feedbacks, event, options = {}) => {
             docInstance.setFont("helvetica", "bold");
             docInstance.setFontSize(8);
             docInstance.setTextColor(150, 150, 150);
-            docInstance.text("IIC LOGO", 183, 24, { align: 'center' });
+            docInstance.text("DIGIFLASH", 183, 24, { align: 'center' });
         }
 
         // Center Header Texts
