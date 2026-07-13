@@ -20,6 +20,7 @@ import AttendanceRecords from './pages/admin/AttendanceRecords';
 import FeedbackManagement from './pages/admin/FeedbackManagement';
 import FeedbackTemplates from './pages/admin/FeedbackTemplates';
 import StaffRoute from './components/auth/StaffRoute';
+import ReportRoute from './components/auth/ReportRoute';
 import ManageCertificates from './pages/admin/ManageCertificates';
 import Winners from './pages/Winners';
 import NominationSubmission from './pages/NominationSubmission';
@@ -76,7 +77,6 @@ function App() {
                 <Route path="/admin/association-members" element={<ManageAssociationMembers />} />
                 <Route path="/admin/faculty" element={<ManageFaculty />} />
                 <Route path="/admin/winners" element={<ManageWinners />} />
-                <Route path="/admin/feedback" element={<FeedbackManagement />} />
                 <Route path="/admin/feedback-templates" element={<FeedbackTemplates />} />
                 <Route path="/admin/certificates" element={<ManageCertificates />} />
                 <Route path="/admin/nominations" element={<ManageNominations />} />
@@ -87,11 +87,16 @@ function App() {
                 <Route path="/admin/expenses" element={<ManageExpenses />} />
               </Route>
 
+              {/* Report Routes */}
+              <Route element={<ReportRoute />}>
+                <Route path="/admin/feedback" element={<FeedbackManagement />} />
+                <Route path="/admin/attendance" element={<AttendanceRecords />} />
+              </Route>
+
               {/* Staff Routes (Admin + Volunteer + Coordinators) */}
               <Route element={<StaffRoute />}>
                 <Route path="/volunteer/dashboard" element={<AttendanceScanner />} />
                 <Route path="/scanner" element={<AttendanceScanner />} />
-                <Route path="/admin/attendance" element={<AttendanceRecords />} />
               </Route>
               
               {/* Catch-all route */}
