@@ -48,8 +48,13 @@ const eventSchema = new mongoose.Schema({
             fontSize: { type: Number, default: 20 },
             color: { type: String, default: '#000000' },
             fontStyle: { type: String, enum: ['normal', 'bold', 'italic'], default: 'normal' },
+            fontFamily: String,
+            variableColors: { type: Map, of: String },
+            variableFontStyles: { type: Map, of: String },
+            variableFontFamilies: { type: Map, of: String },
+            underlineVariables: Boolean,
             width: Number,
-            alignment: { type: String, enum: ['left', 'center', 'right'], default: 'left' }
+            alignment: { type: String, enum: ['left', 'center', 'right', 'justify'], default: 'left' }
         }]
     }
 }, {
