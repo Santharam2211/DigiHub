@@ -10,9 +10,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const statusColors = {
-    Pending: 'bg-amber-50 text-amber-700 border-amber-200',
-    Approved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    Rejected: 'bg-red-50 text-red-700 border-red-200'
+    Approved: 'bg-emerald-50 text-emerald-700 border-emerald-200'
 };
 
 const ManageVolunteers = () => {
@@ -88,9 +86,9 @@ const ManageVolunteers = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {[
                     { label: 'Total', value: stats.total, color: 'text-slate-700', bg: 'bg-slate-50 border-slate-100' },
-                    { label: 'Pending', value: stats.pending, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-100' },
+
                     { label: 'Approved', value: stats.approved, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100' },
-                    { label: 'On-Duty Issued', value: stats.onDuty, color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-100' },
+
                 ].map(stat => (
                     <div key={stat.label} className={`p-6 rounded-[2rem] border ${stat.bg} text-center`}>
                         <p className={`text-3xl font-black ${stat.color}`}>{stat.value}</p>
@@ -112,11 +110,11 @@ const ManageVolunteers = () => {
                     />
                 </div>
                 <div className="flex gap-2">
-                    {['All', 'Pending', 'Approved', 'Rejected'].map(s => (
+                    {['All', 'Approved'].map(s => (
                         <button
                             key={s}
                             onClick={() => setFilterStatus(s)}
-                            className={`px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${ filterStatus === s ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-500 dark:text-slate-400 hover:bg-slate-100' }`}
+                            className={`px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${filterStatus === s ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-500 dark:text-slate-400 hover:bg-slate-100'}`}
                         >
                             {s}
                         </button>
