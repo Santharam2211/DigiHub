@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const { createCloudinaryUpload } = require('../utils/cloudinaryUpload');
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
@@ -8,33 +9,92 @@ const generateCertificate = require('../utils/certificateGenerator');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
 // Certificate template upload — stored in Cloudinary under event_management/certificates
-const upload = createCloudinaryUpload('certificates', ['jpeg', 'jpg', 'png', 'webp'], 1, 'cert-template-');
+// Templates are full-landscape images, allowing up to 10 MB
+const upload = createCloudinaryUpload('certificates', ['jpeg', 'jpg', 'png', 'webp'], 10, 'cert-template-');
 
 // @desc    Upload certificate template and update config
 // @route   POST /api/certificates/config/:eventId
 // @access  Private/Admin
 router.post('/config/:eventId', protect, authorize('Admin'), upload.single('template'), async (req, res, next) => {
     try {
-        const event = await Event.findById(req.params.eventId);
-        if (!event) {
-            res.status(404);
-            throw new Error('Event not found');
+        console.log('[Certificate Config] POST', req.params.eventId);
+
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(req.params.eventId)) {
+            return res.status(400).json({ success: false, message: 'Invalid Event ID format.' });
         }
 
-        const config = JSON.parse(req.body.config);
+        const event = await Event.findById(req.params.eventId);
+        if (!event) {
+            return res.status(404).json({ success: false, message: 'Event not found for the given ID.' });
+        }
+
+        // Parse config safely
+        let config;
+        try {
+            config = JSON.parse(req.body.config);
+        } catch (parseErr) {
+            console.error('[Certificate Config] JSON parse error:', parseErr.message);
+            return res.status(400).json({
+                success: false,
+                message: 'Certificate configuration could not be saved.',
+                error: 'Invalid JSON in config field: ' + parseErr.message
+            });
+        }
+
+        if (!config || typeof config !== 'object') {
+            return res.status(400).json({ success: false, message: 'Configuration object is missing or malformed.' });
+        }
+
         if (req.file) {
             config.template = req.file.path;
         } else {
             // Keep existing template if not uploading new one
-            config.template = event.certificateConfig?.template;
+            config.template = config.template || event.certificateConfig?.template;
+        }
+
+        // Sanitize fields to ensure only known keys are stored
+        if (config.fields && Array.isArray(config.fields)) {
+            config.fields = config.fields.map(f => ({
+                type: f.type,
+                text: f.text || '',
+                x: Number(f.x) || 0,
+                y: Number(f.y) || 0,
+                fontSize: Number(f.fontSize) || 20,
+                color: f.color || '#000000',
+                fontStyle: f.fontStyle || 'normal',
+                fontFamily: f.fontFamily || 'Helvetica',
+                alignment: f.alignment || 'left',
+                width: Number(f.width) || 600,
+                variableColors: f.variableColors && typeof f.variableColors === 'object' ? f.variableColors : {},
+                variableFontStyles: f.variableFontStyles && typeof f.variableFontStyles === 'object' ? f.variableFontStyles : {},
+                variableFontFamilies: f.variableFontFamilies && typeof f.variableFontFamilies === 'object' ? f.variableFontFamilies : {},
+                underlineVariables: !!f.underlineVariables,
+            }));
+        } else {
+            config.fields = [];
         }
 
         event.certificateConfig = config;
         event.markModified('certificateConfig');
-        await event.save();
 
-        res.json(event.certificateConfig);
+        try {
+            await event.save();
+        } catch (saveErr) {
+            console.error('[Certificate Config] Mongoose save error:', saveErr.message, saveErr.errors);
+            const firstError = saveErr.errors ? Object.values(saveErr.errors)[0]?.message : saveErr.message;
+            return res.status(400).json({
+                success: false,
+                message: 'Certificate configuration could not be saved.',
+                error: firstError || saveErr.message
+            });
+        }
+
+        console.log('[Certificate Config] Saved successfully for event:', event._id);
+        // Return plain object so Mongoose internals are not exposed
+        res.json(event.toObject().certificateConfig || { fields: [] });
     } catch (error) {
+        console.error('[Certificate Config] Unexpected error:', error.message);
         next(error);
     }
 });
@@ -44,12 +104,14 @@ router.post('/config/:eventId', protect, authorize('Admin'), upload.single('temp
 // @access  Private/Admin
 router.get('/config/:eventId', protect, authorize('Admin'), async (req, res, next) => {
     try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.eventId)) {
+            return res.status(400).json({ success: false, message: 'Invalid Event ID format.' });
+        }
         const event = await Event.findById(req.params.eventId);
         if (!event) {
-            res.status(404);
-            throw new Error('Event not found');
+            return res.status(404).json({ success: false, message: 'Event not found.' });
         }
-        res.json(event.certificateConfig || { fields: [] });
+        res.json(event.toObject().certificateConfig || { fields: [] });
     } catch (error) {
         next(error);
     }
