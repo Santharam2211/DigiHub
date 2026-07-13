@@ -100,7 +100,7 @@ const Register = () => {
                                         type="text"
                                         name="username"
                                         className="input-premium pl-14"
-                                        placeholder="Murugan"
+                                        placeholder="Santharam"
                                         required
                                         value={formData.username}
                                         onChange={handleChange}
@@ -115,7 +115,7 @@ const Register = () => {
                                         type="text"
                                         name="registrationNumber"
                                         className="input-premium pl-14"
-                                        placeholder="ST12345 (optional)"
+                                        placeholder="727623BCS000"
                                         value={formData.registrationNumber}
                                         onChange={handleChange}
                                     />
@@ -299,7 +299,7 @@ const Register = () => {
                                     type="tel"
                                     name="phone"
                                     className="input-premium pl-14"
-                                    placeholder="+1 234 567 8900"
+                                    placeholder="+91 00000 00000"
                                     value={formData.phone}
                                     onChange={handleChange}
                                 />
