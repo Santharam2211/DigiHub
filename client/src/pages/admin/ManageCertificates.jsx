@@ -52,6 +52,15 @@ const ManageCertificates = () => {
         try {
             const res = await axios.get(`/api/certificates/config/${eventId}`);
             const data = res.data || { fields: [], template: '' };
+            // Normalize fields to ensure variableColors/Styles/Families are always plain objects
+            if (data.fields) {
+                data.fields = data.fields.map(f => ({
+                    ...f,
+                    variableColors: f.variableColors || {},
+                    variableFontStyles: f.variableFontStyles || {},
+                    variableFontFamilies: f.variableFontFamilies || {},
+                }));
+            }
             setConfig(data);
             if (data.template) {
                 setTemplatePreview(getImageUrl(data.template));
@@ -59,7 +68,8 @@ const ManageCertificates = () => {
                 setTemplatePreview(null);
             }
         } catch (error) {
-            toast.error('Failed to load certificate configuration');
+            const msg = error.response?.data?.message || 'Failed to load certificate configuration';
+            toast.error(msg);
         }
     };
 
@@ -84,7 +94,9 @@ const ManageCertificates = () => {
             fontSize: 24,
             color: '#000000',
             fontFamily: 'Helvetica',
-            variableColor: '#000000',
+            variableColors: {},
+            variableFontStyles: {},
+            variableFontFamilies: {},
             fontStyle: 'normal',
             alignment: 'center',
             width: 600
@@ -104,7 +116,14 @@ const ManageCertificates = () => {
     };
 
     const saveConfig = async () => {
-        if (!selectedEventId) return;
+        if (!selectedEventId) {
+            toast.error('Please select an event first.');
+            return;
+        }
+        if (config.fields.length === 0 && !config.template) {
+            toast.error('Please add at least one field or upload a template before saving.');
+            return;
+        }
 
         setIsSaving(true);
         const formData = new FormData();
@@ -112,8 +131,25 @@ const ManageCertificates = () => {
             formData.append('template', templateFile);
         }
 
-        // Ensure template filename of current config is preserved if no new file
-        const configToSave = { ...config };
+        // Clean fields before sending: remove any legacy keys, ensure proper structure
+        const cleanFields = (config.fields || []).map(f => ({
+            type: f.type,
+            text: f.text || '',
+            x: Number(f.x) || 0,
+            y: Number(f.y) || 0,
+            fontSize: Number(f.fontSize) || 20,
+            color: f.color || '#000000',
+            fontStyle: f.fontStyle || 'normal',
+            fontFamily: f.fontFamily || 'Helvetica',
+            alignment: f.alignment || 'left',
+            width: Number(f.width) || 600,
+            variableColors: f.variableColors || {},
+            variableFontStyles: f.variableFontStyles || {},
+            variableFontFamilies: f.variableFontFamilies || {},
+            underlineVariables: !!f.underlineVariables,
+        }));
+
+        const configToSave = { ...config, fields: cleanFields };
         formData.append('config', JSON.stringify(configToSave));
 
         try {
@@ -121,12 +157,24 @@ const ManageCertificates = () => {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             toast.success('Certificate configuration saved!');
-            setConfig(res.data);
-            if (res.data.template) {
-                setTemplatePreview(getImageUrl(res.data.template));
+            const data = res.data || {};
+            // Normalize returned data just like fetchConfig does
+            if (data.fields) {
+                data.fields = data.fields.map(f => ({
+                    ...f,
+                    variableColors: f.variableColors || {},
+                    variableFontStyles: f.variableFontStyles || {},
+                    variableFontFamilies: f.variableFontFamilies || {},
+                }));
+            }
+            setConfig(data);
+            if (data.template) {
+                setTemplatePreview(getImageUrl(data.template));
             }
         } catch (error) {
-            toast.error('Failed to save configuration');
+            const serverMsg = error.response?.data?.message || error.response?.data?.error || 'Failed to save configuration';
+            toast.error(serverMsg);
+            console.error('[Certificate Save Error]', error.response?.data || error.message);
         } finally {
             setIsSaving(false);
         }
