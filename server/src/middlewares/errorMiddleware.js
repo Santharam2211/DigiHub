@@ -12,7 +12,7 @@ const errorMiddleware = (err, req, res, next) => {
 
     if (err.code === 'LIMIT_FILE_SIZE') {
         statusCode = 400;
-        message = 'File too large. Maximum size is 5MB for profile/signature and 10MB for banners.';
+        message = 'File too large. Maximum allowed sizes: 5MB for profile/signature images, 10MB for banners and certificate templates.';
     } else if (err.message && err.message.includes('Images only')) {
         statusCode = 400;
     }
