@@ -80,7 +80,7 @@ exports.createAssociationMember = async (req, res, next) => {
     try {
         const { 
             username, email, password, registrationNumber, 
-            phone, gender, yearAndDept, section, membershipStatus, role, associationRole 
+            phone, gender, yearAndDept, section, membershipStatus, role, associationRole, dateOfBirth
         } = req.body;
 
         if (!username || !email || !password) {
@@ -111,7 +111,8 @@ exports.createAssociationMember = async (req, res, next) => {
             yearAndDept: yearAndDept || 'I B.E. CSE',
             section: section || 'A',
             membershipStatus: membershipStatus || 'Present',
-            associationRole: associationRole || ''
+            associationRole: associationRole || '',
+            dateOfBirth: dateOfBirth || undefined
         });
 
         if (member) {
@@ -126,7 +127,8 @@ exports.createAssociationMember = async (req, res, next) => {
                 yearAndDept: member.yearAndDept,
                 section: member.section,
                 membershipStatus: member.membershipStatus,
-                associationRole: member.associationRole
+                associationRole: member.associationRole,
+                dateOfBirth: member.dateOfBirth
             });
         } else {
             res.status(400);
@@ -396,7 +398,7 @@ exports.updateUserById = async (req, res, next) => {
             username, email, role, registrationNumber, phone, 
             gender, yearAndDept, section, employeeId, 
             department, designation, assignedYear, assignedSection,
-            membershipStatus, associationRole 
+            membershipStatus, associationRole, dateOfBirth
         } = req.body;
 
         user.username = username || user.username;
@@ -414,6 +416,7 @@ exports.updateUserById = async (req, res, next) => {
         user.assignedSection = assignedSection !== undefined ? assignedSection : user.assignedSection;
         user.membershipStatus = membershipStatus || user.membershipStatus;
         user.associationRole = associationRole !== undefined ? associationRole : user.associationRole;
+        user.dateOfBirth = dateOfBirth !== undefined ? dateOfBirth : user.dateOfBirth;
 
         user.assignedYear = undefined;
         user.assignedSection = undefined;
