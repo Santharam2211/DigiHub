@@ -32,7 +32,43 @@ const Home = () => {
                 setStats(statsRes.data);
                 const members = membersRes.data;
                 setAdminProfile(members.find(m => m.role === 'Admin') || null);
-                setAssociationMembers(members.filter(m => m.role !== 'Admin'));
+                
+                const roleOrder = [
+                    "President",
+                    "Secretary",
+                    "General Secretary",
+                    "Treasurer",
+                    "Vice – President",
+                    "Joint Secretary",
+                    "Technical Coordinator",
+                    "Event Coordinator",
+                    "Media & Social Media Coordinator",
+                    "Photography & Design Coordinator",
+                    "Chief Editor & Head of Digitimes",
+                    "Digitimes Incharge (Magazine)",
+                    "Digitimes Incharge",
+                    "Byte Bulletin Incharge (Newsletter)",
+                    "Byte Bulletin Incharge",
+                    "Web Designing Coordinator",
+                    "Documentation Incharge",
+                    "Executive Member",
+                    "Executive Members",
+                    "Digitimes Magazine Team",
+                    "Senior Executive Member"
+                ];
+
+                const filteredMembers = members.filter(m => m.role !== 'Admin');
+                filteredMembers.sort((a, b) => {
+                    let indexA = roleOrder.indexOf(a.associationRole?.trim());
+                    let indexB = roleOrder.indexOf(b.associationRole?.trim());
+                    
+                    if (indexA === -1) indexA = 999;
+                    if (indexB === -1) indexB = 999;
+                    
+                    return indexA - indexB;
+                });
+                
+                setAssociationMembers(filteredMembers);
             } catch (error) {
                 console.error('Failed to fetch home data');
                 setStats({ totalEvents: 0, totalRegistrations: 0, totalAttendees: 0 });
