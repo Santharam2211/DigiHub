@@ -31,6 +31,7 @@ const ManageAssociationMembers = () => {
         section: 'A',
         membershipStatus: 'Present',
         associationRole: '',
+        dateOfBirth: '',
         role: 'Association Member'
     });
     const [showForm, setShowForm] = useState(false);
@@ -142,8 +143,9 @@ const ManageAssociationMembers = () => {
         setForm({
             username: '', email: '', password: '',
             registrationNumber: '', phone: '', gender: 'Male',
-            yearAndDept: 'I B.E. CSE', section: 'A', membershipStatus: 'Present',
+            yearAndDept: 'II B.E. CSE', section: 'A', membershipStatus: 'Present',
             associationRole: '',
+            dateOfBirth: '',
             role: 'Association Member'
         });
         setEditingId(null);
@@ -159,10 +161,11 @@ const ManageAssociationMembers = () => {
             registrationNumber: member.registrationNumber || '',
             phone: member.phone || '',
             gender: member.gender || 'Male',
-            yearAndDept: member.yearAndDept || 'I B.E. CSE',
+            yearAndDept: member.yearAndDept || 'II B.E. CSE',
             section: member.section || 'A',
             membershipStatus: member.membershipStatus || 'Present',
             associationRole: member.associationRole || '',
+            dateOfBirth: member.dateOfBirth ? member.dateOfBirth.split('T')[0] : '',
             role: member.role
         });
         setShowForm(true);
@@ -309,6 +312,17 @@ const ManageAssociationMembers = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
+                                    <label className="text-xs font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Date of Birth</label>
+                                    <div className="relative">
+
+                                        <input
+                                            type="date" className="input-premium pl-14"
+                                            required
+                                            value={form.dateOfBirth} onChange={e => setForm({ ...form, dateOfBirth: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
                                     <label className="text-xs font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Phone Number</label>
                                     <div className="relative">
 
@@ -383,9 +397,11 @@ const ManageAssociationMembers = () => {
                                         <option value="Chief Editor & Head of Digitimes">Chief Editor & Head of Digitimes</option>
                                         <option value="Digitimes Incharge">Digitimes Incharge</option>
                                         <option value="Byte Bulletin Incharge">Byte Bulletin Incharge</option>
-                                        <option value="Digitimes Magazine Team">Digitimes Magazine Team</option>
-                                        <option value="Executive Members">Executive Members</option>
+                                        <option value="Web Designing Coordinator">Web Designing Coordinator</option>
                                         <option value="Documentation Incharge">Documentation Incharge</option>
+                                        <option value="Executive Member">Executive Member</option>
+                                        <option value="Digitimes Magazine Team">Digitimes Magazine Team</option>
+                                        <option value="Senior Executive Member">Senior Executive Member</option>
                                     </select>
                                 </div>
                             </div>
