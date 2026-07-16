@@ -57,10 +57,14 @@ const userSchema = new mongoose.Schema({
             'Photography & Design Coordinator',
             'Chief Editor & Head of Digitimes',
             'Digitimes Incharge',
+            'Digitimes Incharge (Magazine)',
             'Byte Bulletin Incharge',
-            'Digitimes Magazine Team',
-            'Executive Member',
+            'Byte Bulletin Incharge (Newsletter)',
+            'Web Designing Coordinator',
             'Documentation Incharge',
+            'Executive Member',
+            'Digitimes Magazine Team',
+            'Senior Executive Member',
             ''
         ],
         default: ''
@@ -201,9 +205,9 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 // Verify security question answers
 userSchema.methods.matchSecurityAnswers = function (answers) {
     if (!this.securityQuestions || !answers) return false;
-    
+
     const normalize = (str) => (str || '').toString().trim().toLowerCase();
-    
+
     return (
         normalize(this.securityQuestions.bestFriendName) === normalize(answers.bestFriendName) &&
         normalize(this.securityQuestions.favoriteColor) === normalize(answers.favoriteColor) &&
