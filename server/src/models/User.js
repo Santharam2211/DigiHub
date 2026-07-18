@@ -153,7 +153,11 @@ const userSchema = new mongoose.Schema({
     },
     collegeName: {
         type: String,
-        default: 'Saranathan College of Engineering'
+        default: 'Dr. Mahalingam College of Engineering and Technology'
+    },
+    passoutYear: {
+        type: Number,
+        sparse: true
     },
     reimbursementBalance: {
         type: Number,
