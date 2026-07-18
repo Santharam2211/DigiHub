@@ -19,6 +19,7 @@ const Register = () => {
         gender: 'Male',
         yearAndDept: 'I B.E. CSE',
         section: 'A',
+        passoutYear: '',
         securityQuestions: {
             bestFriendName: '',
             favoriteColor: '',
@@ -100,7 +101,7 @@ const Register = () => {
                                         type="text"
                                         name="username"
                                         className="input-premium pl-14"
-                                        placeholder="Santharam"
+                                        placeholder="Murugan"
                                         required
                                         value={formData.username}
                                         onChange={handleChange}
@@ -115,7 +116,7 @@ const Register = () => {
                                         type="text"
                                         name="registrationNumber"
                                         className="input-premium pl-14"
-                                        placeholder="727623BCS000"
+                                        placeholder="ST12345 (optional)"
                                         value={formData.registrationNumber}
                                         onChange={handleChange}
                                     />
@@ -259,6 +260,20 @@ const Register = () => {
                         </div>
 
                         <div className="space-y-1.5">
+                            <label className="text-sm font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Passout Year</label>
+                            <div className="relative">
+                                <input
+                                    type="number"
+                                    name="passoutYear"
+                                    className="input-premium pl-4"
+                                    placeholder="e.g., 2026"
+                                    value={formData.passoutYear}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
                             <label className="text-sm font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Email Address</label>
                             <div className="relative">
 
@@ -299,7 +314,7 @@ const Register = () => {
                                     type="tel"
                                     name="phone"
                                     className="input-premium pl-14"
-                                    placeholder="+91 00000 00000"
+                                    placeholder="+1 234 567 8900"
                                     value={formData.phone}
                                     onChange={handleChange}
                                 />
