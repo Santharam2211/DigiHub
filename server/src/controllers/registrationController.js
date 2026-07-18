@@ -308,3 +308,47 @@ exports.exportRegistrationPDF = async (req, res, next) => {
         next(error);
     }
 };
+
+// @desc    Get total participation data for all participants
+// @route   GET /api/registrations/total-participation
+// @access  Private/Admin
+exports.getTotalParticipation = async (req, res, next) => {
+    try {
+        // Fetch all users with roles that can participate
+        const users = await User.find({
+            role: { $in: ['Participant', 'Association Member', 'Student Coordinator'] }
+        })
+        .select('-password -securityQuestions')
+        .lean();
+
+        // Fetch all attended registrations
+        const registrations = await Registration.find({ attendanceStatus: true })
+            .populate('event', 'title eventDate category')
+            .lean();
+
+        // Map registrations to users
+        const userRegistrations = {};
+        registrations.forEach(reg => {
+            const userId = reg.participant.toString();
+            if (!userRegistrations[userId]) {
+                userRegistrations[userId] = [];
+            }
+            userRegistrations[userId].push(reg.event);
+        });
+
+        // Combine user data with registration data
+        const participationData = users.map(user => {
+            const attendedEvents = userRegistrations[user._id.toString()] || [];
+            return {
+                ...user,
+                attendedEvents,
+                totalAttendedEvents: attendedEvents.length
+            };
+        });
+
+        res.json(participationData);
+    } catch (error) {
+        next(error);
+    }
+};
+
