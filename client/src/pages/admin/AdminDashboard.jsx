@@ -524,6 +524,7 @@ const AdminDashboard = () => {
                             { title: 'Volunteer Applications', icon: <UserCheck />, color: 'bg-violet-100 text-violet-600', link: '/admin/volunteers' },
                             { title: 'Faculty Registry', icon: <UserCheck />, color: 'bg-indigo-100 text-indigo-600', link: '/admin/faculty' },
                             { title: 'Attendance Records', icon: <Download />, color: 'bg-emerald-100 text-emerald-600', link: '/admin/attendance' },
+                            { title: 'Total Participation', icon: <Users />, color: 'bg-indigo-100 text-indigo-600', link: '/admin/total-participation' },
                             { title: 'Association Members', icon: <Users />, color: 'bg-indigo-100 text-indigo-600', link: '/admin/association-members' },
                             { title: 'Scanner Mode', icon: <Search />, color: 'bg-amber-100 text-amber-600', link: '/scanner' },
                             { title: 'Feedback Management', icon: <Activity />, color: 'bg-pink-100 text-pink-600', link: '/admin/feedback' },
