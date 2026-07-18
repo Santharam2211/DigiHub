@@ -32,6 +32,7 @@ const ManageAssociationMembers = () => {
         membershipStatus: 'Present',
         associationRole: '',
         dateOfBirth: '',
+        passoutYear: '',
         role: 'Association Member'
     });
     const [showForm, setShowForm] = useState(false);
@@ -146,6 +147,7 @@ const ManageAssociationMembers = () => {
             yearAndDept: 'II B.E. CSE', section: 'A', membershipStatus: 'Present',
             associationRole: '',
             dateOfBirth: '',
+            passoutYear: '',
             role: 'Association Member'
         });
         setEditingId(null);
@@ -166,6 +168,7 @@ const ManageAssociationMembers = () => {
             membershipStatus: member.membershipStatus || 'Present',
             associationRole: member.associationRole || '',
             dateOfBirth: member.dateOfBirth ? member.dateOfBirth.split('T')[0] : '',
+            passoutYear: member.passoutYear || '',
             role: member.role
         });
         setShowForm(true);
@@ -403,6 +406,15 @@ const ManageAssociationMembers = () => {
                                         <option value="Digitimes Magazine Team">Digitimes Magazine Team</option>
                                         <option value="Senior Executive Member">Senior Executive Member</option>
                                     </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Passout Year</label>
+                                    <input
+                                        type="number"
+                                        className="input-premium"
+                                        placeholder="e.g., 2026"
+                                        value={form.passoutYear} onChange={e => setForm({ ...form, passoutYear: e.target.value })}
+                                    />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-4">
