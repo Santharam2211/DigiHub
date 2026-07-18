@@ -261,6 +261,7 @@ const generatePDFReport = async (registrations, event, options = {}) => {
         : ['S.No', 'Roll Number', 'Name of the Student', 'Dept/Class', 'Email', 'Contact Number'];
 
     let tableRows = [];
+    const signaturesList = [];
     if (!isTeamEvent) {
         tableRows = sortedRegistrations.map((reg, index) => {
             const participant = reg.participant || {};
@@ -276,6 +277,7 @@ const generatePDFReport = async (registrations, event, options = {}) => {
             ];
             if (isAttendance) {
                 rowData.push('');
+                signaturesList.push(reg.signature || (participant && participant.signature) || null);
             } else {
                 rowData.push(participant.email || '-');
                 rowData.push(participant.phone || '-');
@@ -315,6 +317,7 @@ const generatePDFReport = async (registrations, event, options = {}) => {
                 ];
                 if (isAttendance) {
                     rowData.push('');
+                    signaturesList.push(reg.signature || (participant && participant.signature) || null);
                 } else {
                     rowData.push(participant.email || '-');
                     rowData.push(participant.phone || '-');
@@ -330,6 +333,13 @@ const generatePDFReport = async (registrations, event, options = {}) => {
                 }
             });
         });
+    }
+
+    const signatureImages = [];
+    if (isAttendance) {
+        const fetchPromises = signaturesList.map(sig => getLogoBase64(sig));
+        const resolvedSigs = await Promise.all(fetchPromises);
+        signatureImages.push(...resolvedSigs);
     }
 
     autoTable(doc, {
@@ -373,6 +383,20 @@ const generatePDFReport = async (registrations, event, options = {}) => {
         ),
         didDrawPage: (data) => {
             drawHeader(doc);
+        },
+        didDrawCell: (data) => {
+            if (isAttendance && data.section === 'body' && data.column.index === 4) {
+                const sigObj = signatureImages[data.row.index];
+                if (sigObj && sigObj.data) {
+                    try {
+                        const dimH = data.cell.height - 4;
+                        const dimW = data.cell.width - 4;
+                        doc.addImage(sigObj.data, sigObj.format, data.cell.x + 2, data.cell.y + 2, dimW, dimH);
+                    } catch (e) {
+                        console.error('Failed to add signature image to cell', e);
+                    }
+                }
+            }
         }
     });
 
