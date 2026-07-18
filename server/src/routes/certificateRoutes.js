@@ -163,6 +163,119 @@ router.get('/download/:regId', protect, async (req, res, next) => {
     }
 });
 
+// @desc    Get certificate render data for client-side PDF generation (Participant)
+// @route   GET /api/certificates/data/:regId
+// @access  Private (own registration only)
+router.get('/data/:regId', protect, async (req, res, next) => {
+    try {
+        const registration = await Registration.findById(req.params.regId)
+            .populate('participant', 'username gender yearAndDept registrationNumber collegeName email')
+            .populate('event', 'title eventDate certificateConfig feedbackForm');
+
+        console.log(`[CERTIFICATE] GET /data/${req.params.regId}`);
+        console.log(`[CERTIFICATE] Registration found:`, !!registration);
+        if (registration) {
+            console.log(`[CERTIFICATE] Template configured:`, !!registration.event.certificateConfig?.template);
+            console.log(`[CERTIFICATE] Auth check: PartID=${registration.participant?._id}, UserID=${req.user._id}, Role=${req.user.role}`);
+        }
+
+        if (!registration) {
+            console.log(`[CERTIFICATE] Returning 400 Registration not found`);
+            return res.status(400).json({ message: 'Registration not found' });
+        }
+
+        // Only the owner or Admin can fetch certificate data
+        if (
+            registration.participant._id.toString() !== req.user._id.toString() &&
+            req.user.role !== 'Admin'
+        ) {
+            return res.status(403).json({ message: 'Not authorized to access this certificate' });
+        }
+
+        // Eligibility checks
+        if (!registration.attendanceStatus) {
+            return res.status(403).json({ message: 'You must have attended the event to download the certificate.' });
+        }
+        if (registration.event.feedbackForm?.length > 0 && !registration.feedbackSubmitted) {
+            return res.status(403).json({ message: 'Please submit your feedback before downloading the certificate.' });
+        }
+
+        const event = registration.event;
+        if (!event.certificateConfig?.template) {
+            console.log(`[CERTIFICATE] Returning 400 Template missing`);
+            return res.status(400).json({ message: 'Certificate template not configured for this event. Please contact the administrator.' });
+        }
+
+        res.json({
+            participant: {
+                username           : registration.participant.username,
+                gender             : registration.participant.gender,
+                yearAndDept        : registration.participant.yearAndDept,
+                registrationNumber : registration.participant.registrationNumber,
+                collegeName        : registration.participant.collegeName,
+            },
+            event: {
+                title    : event.title,
+                eventDate: event.eventDate,
+            },
+            config        : event.toObject().certificateConfig,
+            registrationId: registration.registrationId,
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// @desc    Get certificate render data for client-side PDF generation (Volunteer)
+// @route   GET /api/certificates/volunteer-data/:volAppId
+// @access  Private (own application only)
+router.get('/volunteer-data/:volAppId', protect, async (req, res, next) => {
+    try {
+        const volApp = await VolunteerApplication.findById(req.params.volAppId)
+            .populate('applicant', 'username gender yearAndDept registrationNumber collegeName email')
+            .populate('event', 'title eventDate certificateConfig');
+
+        if (!volApp) {
+            return res.status(404).json({ message: 'Volunteer application not found' });
+        }
+
+        if (volApp.applicant._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized to access this certificate' });
+        }
+
+        if (volApp.status !== 'Approved') {
+            return res.status(403).json({ message: 'Your application must be Approved to download a certificate.' });
+        }
+
+        const event = volApp.event;
+        if (!event.certificateConfig?.template) {
+            return res.status(404).json({ message: 'Certificate template not configured for this event. Please contact the administrator.' });
+        }
+
+        const registrationId = `VOL-${volApp._id.toString().slice(-6).toUpperCase()}`;
+
+        res.json({
+            participant: {
+                username           : volApp.applicant.username,
+                gender             : volApp.applicant.gender,
+                yearAndDept        : volApp.applicant.yearAndDept,
+                registrationNumber : volApp.applicant.registrationNumber,
+                collegeName        : volApp.applicant.collegeName,
+            },
+            event: {
+                title    : event.title,
+                eventDate: event.eventDate,
+            },
+            config        : event.toObject().certificateConfig,
+            registrationId,
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+
 // @desc    Download certificate (Volunteer/Association Member version)
 // @route   GET /api/certificates/volunteer-download/:volAppId
 // @access  Private (Applicant only)
