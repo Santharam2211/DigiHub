@@ -33,6 +33,7 @@ import AssociationMemberProfile from './pages/AssociationMemberProfile';
 import ManageVolunteers from './pages/admin/ManageVolunteers';
 import SystemSettings from './pages/admin/SystemSettings';
 import ManageExpenses from './pages/admin/ManageExpenses';
+import TotalParticipation from './pages/admin/TotalParticipation';
 import WorkRequests from './pages/WorkRequests';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -85,6 +86,7 @@ function App() {
                 <Route path="/admin/volunteers" element={<ManageVolunteers />} />
                 <Route path="/admin/settings" element={<SystemSettings />} />
                 <Route path="/admin/expenses" element={<ManageExpenses />} />
+                <Route path="/admin/total-participation" element={<TotalParticipation />} />
               </Route>
 
               {/* Report Routes */}
