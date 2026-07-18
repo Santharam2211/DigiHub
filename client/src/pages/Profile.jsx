@@ -36,6 +36,7 @@ const Profile = () => {
         gender: '',
         yearAndDept: '',
         section: '',
+        passoutYear: '',
         employeeId: '',
         department: '',
         designation: '',
@@ -64,6 +65,7 @@ const Profile = () => {
                 gender: user.gender || 'Male',
                 yearAndDept: user.yearAndDept || 'I B.E. CSE',
                 section: user.section !== undefined ? user.section : 'A',
+                passoutYear: user.passoutYear || '',
                 employeeId: user.employeeId || '',
                 department: user.department || '',
                 designation: user.designation || '',
@@ -124,6 +126,7 @@ const Profile = () => {
             fd.append('gender', formData.gender);
             fd.append('yearAndDept', formData.yearAndDept);
             fd.append('section', formData.section);
+            fd.append('passoutYear', formData.passoutYear);
             fd.append('employeeId', formData.employeeId);
             fd.append('department', formData.department);
             fd.append('designation', formData.designation);
@@ -260,6 +263,12 @@ const Profile = () => {
                                 <div className="px-3 md:px-4 py-2 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm dark:text-white">
                                     <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Section</p>
                                     <p className="text-xs md:text-sm font-black text-white">{user.section}</p>
+                                </div>
+                            )}
+                            {isStudent && user?.passoutYear && (
+                                <div className="px-3 md:px-4 py-2 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm dark:text-white">
+                                    <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Passout Year</p>
+                                    <p className="text-xs md:text-sm font-black text-white">{user.passoutYear}</p>
                                 </div>
                             )}
                         </div>
@@ -475,6 +484,17 @@ const Profile = () => {
                                                     <option key={opt} value={opt}>{opt}</option>
                                                 ))}
                                             </select>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Passout Year</label>
+                                            <input
+                                                type="number"
+                                                name="passoutYear"
+                                                className="input-premium"
+                                                placeholder="e.g., 2026"
+                                                value={formData.passoutYear}
+                                                onChange={handleChange}
+                                            />
                                         </div>
                                     </div>
                                 </>
