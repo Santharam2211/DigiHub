@@ -21,7 +21,7 @@ const generateToken = (id) => {
 // @access  Public
 exports.register = async (req, res, next) => {
     try {
-        const { username, email, password, registrationNumber, phone, bio, skills, dateOfBirth, signature, gender, yearAndDept, section, securityQuestions } = req.body;
+        const { username, email, password, registrationNumber, phone, bio, skills, dateOfBirth, signature, gender, yearAndDept, section, passoutYear, securityQuestions } = req.body;
 
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -44,6 +44,7 @@ exports.register = async (req, res, next) => {
             gender: gender || 'Male',
             yearAndDept: yearAndDept || 'I B.E. CSE',
             section: section || 'A',
+            passoutYear: passoutYear || undefined,
             securityQuestions: securityQuestions || undefined,
         });
 
@@ -62,6 +63,7 @@ exports.register = async (req, res, next) => {
                 gender: user.gender,
                 yearAndDept: user.yearAndDept,
                 section: user.section,
+                passoutYear: user.passoutYear,
                 token: generateToken(user._id),
             });
         } else {
@@ -80,7 +82,7 @@ exports.createAssociationMember = async (req, res, next) => {
     try {
         const { 
             username, email, password, registrationNumber, 
-            phone, gender, yearAndDept, section, membershipStatus, role, associationRole, dateOfBirth
+            phone, gender, yearAndDept, section, passoutYear, membershipStatus, role, associationRole, dateOfBirth
         } = req.body;
 
         if (!username || !email || !password) {
@@ -110,6 +112,7 @@ exports.createAssociationMember = async (req, res, next) => {
             gender: gender || 'Male',
             yearAndDept: yearAndDept || 'I B.E. CSE',
             section: section || 'A',
+            passoutYear: passoutYear || undefined,
             membershipStatus: membershipStatus || 'Present',
             associationRole: associationRole || '',
             dateOfBirth: dateOfBirth || undefined
@@ -126,6 +129,7 @@ exports.createAssociationMember = async (req, res, next) => {
                 gender: member.gender,
                 yearAndDept: member.yearAndDept,
                 section: member.section,
+                passoutYear: member.passoutYear,
                 membershipStatus: member.membershipStatus,
                 associationRole: member.associationRole,
                 dateOfBirth: member.dateOfBirth
@@ -250,6 +254,7 @@ exports.login = async (req, res, next) => {
                 gender: user.gender,
                 yearAndDept: user.yearAndDept,
                 section: user.section,
+                passoutYear: user.passoutYear,
                 employeeId: user.employeeId,
                 department: user.department,
                 designation: user.designation,
@@ -291,6 +296,7 @@ exports.getProfile = async (req, res, next) => {
                 gender: user.gender,
                 yearAndDept: user.yearAndDept,
                 section: user.section,
+                passoutYear: user.passoutYear,
                 employeeId: user.employeeId,
                 department: user.department,
                 designation: user.designation,
@@ -314,7 +320,7 @@ exports.getProfile = async (req, res, next) => {
 // @access  Private
 exports.updateProfile = async (req, res, next) => {
     try {
-        const { username, phone, bio, skills, registrationNumber, dateOfBirth, signature, gender, yearAndDept, section } = req.body;
+        const { username, phone, bio, skills, registrationNumber, dateOfBirth, signature, gender, yearAndDept, section, passoutYear } = req.body;
         const user = await User.findById(req.user._id);
 
         if (user) {
@@ -337,6 +343,7 @@ exports.updateProfile = async (req, res, next) => {
             user.gender = gender || user.gender;
             user.yearAndDept = yearAndDept || user.yearAndDept;
             user.section = section || user.section;
+            user.passoutYear = passoutYear !== undefined ? (passoutYear === '' ? undefined : passoutYear) : user.passoutYear;
 
             const updatedUser = await user.save();
 
@@ -355,6 +362,7 @@ exports.updateProfile = async (req, res, next) => {
                 gender: updatedUser.gender,
                 yearAndDept: updatedUser.yearAndDept,
                 section: updatedUser.section,
+                passoutYear: updatedUser.passoutYear,
                 employeeId: updatedUser.employeeId,
                 department: updatedUser.department,
                 designation: updatedUser.designation,
@@ -396,7 +404,7 @@ exports.updateUserById = async (req, res, next) => {
 
         const { 
             username, email, role, registrationNumber, phone, 
-            gender, yearAndDept, section, employeeId, 
+            gender, yearAndDept, section, passoutYear, employeeId, 
             department, designation, assignedYear, assignedSection,
             membershipStatus, associationRole, dateOfBirth
         } = req.body;
@@ -409,6 +417,7 @@ exports.updateUserById = async (req, res, next) => {
         user.gender = gender || user.gender;
         user.yearAndDept = yearAndDept || user.yearAndDept;
         user.section = section || user.section;
+        user.passoutYear = passoutYear !== undefined ? (passoutYear === '' ? undefined : passoutYear) : user.passoutYear;
         user.employeeId = employeeId !== undefined ? (employeeId === '' ? undefined : employeeId) : user.employeeId;
         user.department = department !== undefined ? department : user.department;
         user.designation = designation !== undefined ? designation : user.designation;
