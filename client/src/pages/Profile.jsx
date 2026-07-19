@@ -396,13 +396,25 @@ const Profile = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6 items-start">
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Upload Signature Image</label>
+                                        <label className="text-xs font-black text-slate-900 dark:text-slate-400 uppercase tracking-widest pl-1">Upload Signature</label>
                                         <input
                                             type="file"
-                                            accept="image/*"
+                                            accept=".png,image/png"
                                             onChange={handleSignatureUpload}
                                             className="input-premium cursor-pointer file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:bg-primary-50 dark:file:bg-primary-500/10 file:text-primary-700 dark:file:text-primary-400 file:font-black file:text-xs"
                                         />
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 pl-1 leading-relaxed">
+                                            Only <span className="font-black text-primary-600 dark:text-primary-400">.png</span> files are allowed for the signature upload. If your signature has a background or is in another format,{' '}
+                                            <a
+                                                href="https://www.remove.bg/"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-black text-indigo-600 dark:text-indigo-400 underline underline-offset-2 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+                                            >
+                                                click here
+                                            </a>{' '}
+                                            to remove the background and convert it to .png format before uploading.
+                                        </p>
                                     </div>
                                     {signaturePreview && (
                                         <div className="p-4 bg-slate-50 dark:bg-[#1a1d24] border border-slate-100 dark:border-slate-800 rounded-3xl flex flex-col items-center gap-3">
