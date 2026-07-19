@@ -274,10 +274,10 @@ const EventDetails = () => {
                                 alt={event.title}
                             />
                             <div className="absolute top-6 left-6 flex gap-2">
-                                <span className="bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-primary-700 shadow-lg dark:text-white">
+                                <span className="bg-white/90 dark:bg-slate-900/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-primary-700 shadow-lg dark:text-white">
                                     {event.category}
                                 </span>
-                                <span className={`bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold shadow-lg ${ event.status === 'Open' ? 'text-emerald-600' : 'text-red-600' } dark:text-white`}>
+                                <span className={`bg-white/90 dark:bg-slate-900/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold shadow-lg ${ event.status === 'Open' ? 'text-emerald-600' : 'text-red-600' } dark:text-white`}>
                                     {event.status}
                                 </span>
                             </div>
