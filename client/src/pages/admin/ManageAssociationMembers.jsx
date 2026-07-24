@@ -5,7 +5,7 @@ import {
     UserPlus, Users, Mail, Lock,
     Loader2, ShieldCheck,
     ArrowLeft, User, Phone, Hash, GraduationCap, School,
-    CheckCircle, History, RefreshCcw, Edit2, Trash2, X, Save, Download
+    CheckCircle, History, RefreshCcw, Edit2, Trash2, X, Save, Download, Search
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,6 +26,7 @@ const ManageAssociationMembers = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState('Present'); // 'Present' or 'Past'
+    const [searchQuery, setSearchQuery] = useState('');
     const [editingId, setEditingId] = useState(null);
     const [form, setForm] = useState({
         username: '',
@@ -48,7 +49,41 @@ const ManageAssociationMembers = () => {
         try {
             const res = await axios.get(`/api/auth/users`);
             const roles = ['Association Member'];
-            setMembers(res.data.filter(u => roles.includes(u.role)));
+            let fetchedMembers = res.data.filter(u => roles.includes(u.role));
+            
+            const roleOrder = [
+                "President",
+                "Secretary",
+                "General Secretary",
+                "Treasurer",
+                "Vice – President",
+                "Joint Secretary",
+                "Technical Coordinator",
+                "Event Coordinator",
+                "Media & Social Media Coordinator",
+                "Photography & Design Coordinator",
+                "Chief Editor & Head of Digitimes",
+                "Digitimes Incharge (Magazine)",
+                "Digitimes Incharge",
+                "Byte Bulletin Incharge (Newsletter)",
+                "Byte Bulletin Incharge",
+                "Web Designing Coordinator",
+                "Documentation Incharge",
+                "Executive Member",
+                "Executive Members",
+                "Digitimes Magazine Team",
+                "Senior Executive Member"
+            ];
+
+            fetchedMembers.sort((a, b) => {
+                let indexA = roleOrder.indexOf(a.associationRole?.trim());
+                let indexB = roleOrder.indexOf(b.associationRole?.trim());
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+                return indexA - indexB;
+            });
+
+            setMembers(fetchedMembers);
         } catch (error) {
             toast.error('Failed to load association members');
         } finally {
@@ -179,6 +214,7 @@ const ManageAssociationMembers = () => {
             role: member.role
         });
         setShowForm(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleDelete = async (id) => {
@@ -240,7 +276,13 @@ const ManageAssociationMembers = () => {
         }
     };
 
-    const filteredMembers = members.filter(m => m.membershipStatus === activeTab);
+    const filteredMembers = members.filter(m => {
+        const matchesStatus = m.membershipStatus === activeTab;
+        const matchesSearch = m.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            m.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            m.registrationNumber?.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesStatus && matchesSearch;
+    });
 
     return (
         <div className="space-y-12 pb-40">
@@ -405,11 +447,14 @@ const ManageAssociationMembers = () => {
                                         <option value="Media & Social Media Coordinator">Media & Social Media Coordinator</option>
                                         <option value="Photography & Design Coordinator">Photography & Design Coordinator</option>
                                         <option value="Chief Editor & Head of Digitimes">Chief Editor & Head of Digitimes</option>
+                                        <option value="Digitimes Incharge (Magazine)">Digitimes Incharge (Magazine)</option>
                                         <option value="Digitimes Incharge">Digitimes Incharge</option>
+                                        <option value="Byte Bulletin Incharge (Newsletter)">Byte Bulletin Incharge (Newsletter)</option>
                                         <option value="Byte Bulletin Incharge">Byte Bulletin Incharge</option>
                                         <option value="Web Designing Coordinator">Web Designing Coordinator</option>
                                         <option value="Documentation Incharge">Documentation Incharge</option>
                                         <option value="Executive Member">Executive Member</option>
+                                        <option value="Executive Members">Executive Members</option>
                                         <option value="Digitimes Magazine Team">Digitimes Magazine Team</option>
                                         <option value="Senior Executive Member">Senior Executive Member</option>
                                     </select>
@@ -485,6 +530,16 @@ const ManageAssociationMembers = () => {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                            type="text"
+                            placeholder="Search members by name, email or roll number..."
+                            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-[#1a1d24] border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all dark:text-white focus:outline-none"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
                 </div>
 
