@@ -21,6 +21,12 @@ app.use(morgan('dev'));
 // Static folder for uploads
 app.use('/uploads', express.static(UPLOADS_DIR));
 
+// Loadtester verification
+app.get('/.well-known/loadtester-verify.txt', (req, res) => {
+  res.type('text/plain');
+  res.send('652e07cc025f8122bc2c7cf49454e8dc3630ac917589e26d');
+});
+
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/events', require('./routes/eventRoutes'));
