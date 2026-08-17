@@ -10,6 +10,8 @@
  */
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
+import { jsPDF } from 'jspdf';
+
 
 const cleanSection = (sec) => {
     if (sec === null || sec === undefined) return '';
@@ -301,7 +303,6 @@ export const downloadCertificateAsPDF = async (
     // ------------------------------------------------------------------
     // 3. Embed into an A4-landscape PDF — fills the page edge-to-edge.
     // ------------------------------------------------------------------
-    const { jsPDF } = await import('jspdf');
 
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const pW  = pdf.internal.pageSize.getWidth();   // 297 mm
