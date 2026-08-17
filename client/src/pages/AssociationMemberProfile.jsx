@@ -1,6 +1,7 @@
 import { getImageUrl } from '../utils/imageUrl';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { downloadCertificateAsPDF } from '../utils/renderCertificateCanvas';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import {
@@ -176,7 +177,6 @@ const AssociationMemberProfile = () => {
     const handleDownloadVolCertificate = async (appId, eventTitle) => {
         try {
             const { data } = await axios.get(`/api/certificates/volunteer-data/${appId}`);
-            const { downloadCertificateAsPDF } = await import('../utils/renderCertificateCanvas');
             await downloadCertificateAsPDF(
                 data.participant,
                 data.event,
