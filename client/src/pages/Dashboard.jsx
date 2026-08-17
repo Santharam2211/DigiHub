@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { downloadCertificateAsPDF } from '../utils/renderCertificateCanvas';
 import {
     Calendar, QrCode, Download, MapPin, CheckCircle,
     Clock, AlertCircle, Cake, Sparkles, ArrowUpRight,
@@ -519,7 +520,6 @@ const Dashboard = () => {
         try {
             // Fetch validated data from the backend (eligibility check happens server-side)
             const { data } = await axios.get(`/api/certificates/data/${regId}`);
-            const { downloadCertificateAsPDF } = await import('../utils/renderCertificateCanvas');
             await downloadCertificateAsPDF(
                 data.participant,
                 data.event,
